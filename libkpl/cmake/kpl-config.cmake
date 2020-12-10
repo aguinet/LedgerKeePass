@@ -1,0 +1,5 @@
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+if(NOT TARGET sodium)
+  find_package(sodium REQUIRED)
+endif()
+include("${CMAKE_CURRENT_LIST_DIR}/kpl-target.cmake")
