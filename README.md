@@ -11,7 +11,8 @@ The userland part has been implemented in a [fork of
 KeepassXC](https://github.com/aguinet/keepassxc/tree/feature/ledger). It uses
 the provided ``libkpl`` library, to talk with the Ledger application.  The goal
 is to have this merged in the official [KeepassXC](kpxc) application when the
-Ledger application will be considered stable.
+Ledger application will be considered stable (see
+[PR](https://github.com/keepassxreboot/keepassxc/pull/5842)).
 
 ## Screenshots
 
