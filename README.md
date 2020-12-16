@@ -135,6 +135,7 @@ and then ``libkpl`` itself.
 * KeepassXC GUI for key slots
 * find a proper C/C++ library to communicate with ledger devices
 * test on actual devices!
+* make an icon for the app :)
 
 
 [speculos]: https://github.com/LedgerHQ/speculos/
