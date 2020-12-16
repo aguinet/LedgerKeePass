@@ -33,7 +33,7 @@ static inline bool is_key_valid(uint8_t slot) {
 static inline void set_key_as_valid(uint8_t slot) {
   uint8_t key_valids = N_storage.key_valids;
   key_valids |= (1U<<slot);
-  nvm_write(&N_storage.key_valids, &key_valids, sizeof(key_valids));
+  nvm_write((void*)&N_storage.key_valids, &key_valids, sizeof(key_valids));
 }
 
 #endif

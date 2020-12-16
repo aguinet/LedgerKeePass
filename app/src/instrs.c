@@ -27,7 +27,7 @@ static void storeKeySlot(uint8_t slot, uint8_t const* data)
   memset(&key, 0, sizeof(key));
   memcpy(key.data, data, KPL_KEY_SIZE);
 
-  nvm_write(&N_storage.keys[slot], &key, sizeof(key));
+  nvm_write((void*)&N_storage.keys[slot], &key, sizeof(key));
   set_key_as_valid(slot);
   explicit_bzero(&key, sizeof(stored_key_t));
 }
@@ -108,7 +108,6 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const* data, uint8_t 
   if (slot >= KPL_SLOT_COUNT || data_len != X25519_PTSIZE) {
     THROW(INVALID_PARAMETER);
   }
-  stored_key_t volatile const* key = &N_storage.keys[slot];
   if (!is_key_valid(slot)) {
     THROW(INVALID_PARAMETER);
   }
@@ -133,9 +132,11 @@ static void handleGetKeyFromNameAfterApprove()
 {
   uint8_t* kpkey = &G_io_apdu_buffer[X25519_PTSIZE];
   os_perso_derive_node_with_seed_key(HDW_SLIP21, 0,
-      GetKeyFromNameArgs_.path, GetKeyFromNameArgs_.path_len,
+      // I don't like this u8 => u32 cast as this sounds UB to me... (and
+      // involves unaligned accesses)
+      (const uint32_t*)GetKeyFromNameArgs_.path, GetKeyFromNameArgs_.path_len,
       kpkey, NULL,
-      "keepass_seed", 12);
+      (uint8_t*)"keepass_seed", 12);
 
   // Encrypt the resulting key
   uint8_t* own_pubkey = &G_io_apdu_buffer[0];
@@ -192,5 +193,5 @@ handleInstrFunTy getHandleInstr(uint8_t Ins)
   if (Ins >= INS_LAST) {
     return NULL;
   }
-  return PIC(Funcs[Ins]);
+  return (handleInstrFunTy)PIC(Funcs[Ins]);
 }
