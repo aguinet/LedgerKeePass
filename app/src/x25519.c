@@ -44,8 +44,8 @@ static bool X25519(uint8_t* out, uint8_t const* pub_point, uint8_t const* priv_s
 
 end:
   // Cleanup
-  os_memset(outtmp, 0, sizeof(outtmp));
-  os_memset(scalar_, 0, sizeof(scalar_));
+  explicit_bzero(outtmp, sizeof(outtmp));
+  explicit_bzero(scalar_, sizeof(scalar_));
   return ret;
 }
 
@@ -85,9 +85,9 @@ bool X25519EncryptKPKey(uint8_t* kpkey, uint8_t* own_pubkey,
 
 end:
   // Cleanup
-  os_memset(&own_privkey, 0, sizeof(own_privkey));
-  os_memset(ecdhe_secret, 0, sizeof(ecdhe_secret));
-  os_memset(keystream, 0, sizeof(keystream));
-  os_memset(&h, 0, sizeof(h));
+  explicit_bzero(&own_privkey, sizeof(own_privkey));
+  explicit_bzero(ecdhe_secret, sizeof(ecdhe_secret));
+  explicit_bzero(keystream, sizeof(keystream));
+  explicit_bzero(&h, sizeof(h));
   return ret;
 }

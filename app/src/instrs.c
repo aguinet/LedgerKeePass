@@ -29,7 +29,7 @@ static void storeKeySlot(uint8_t slot, uint8_t const* data)
 
   nvm_write(&N_storage.keys[slot], &key, sizeof(key));
   set_key_as_valid(slot);
-  os_memset(&key, 0, sizeof(stored_key_t));
+  explicit_bzero(&key, sizeof(stored_key_t));
 }
 
 static void handleStoreKeyConfirmErase()
@@ -37,7 +37,7 @@ static void handleStoreKeyConfirmErase()
   storeKeySlot(handleStoreKeyConfirmEraseArgs_.slot,
     handleStoreKeyConfirmEraseArgs_.key);
 
-  os_memset(&handleStoreKeyConfirmEraseArgs_, 0,
+  explicit_bzero(&handleStoreKeyConfirmEraseArgs_,
     sizeof(handleStoreKeyConfirmEraseArgs_));
 
   G_io_apdu_buffer[0] = 0x90;
