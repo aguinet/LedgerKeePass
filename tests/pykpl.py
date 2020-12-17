@@ -2,8 +2,8 @@ import random
 import donna25519
 import hashlib
 import struct
-from ledgerblue.comm import getDongleTCP
-from ledgerblue.commException import CommException
+from ledgerwallet.client import LedgerClient, CommException
+from ledgerwallet.transport.tcp import TcpDevice
 
 GET_APP_CONFIGURATION = 0
 STORE_KEY = 1
@@ -17,26 +17,22 @@ class PyKPL:
     @classmethod
     def get_key_from_name(cls, dongle, name):
         privkey, pubkey = cls.gen_x25519_keypair()
-        apdu = cls.apdu(GET_KEY_FROM_NAME, 0, 0, pubkey.public+name, 32)
-        result = dongle.exchange(apdu)
+        result = dongle.apdu_exchange(GET_KEY_FROM_NAME, pubkey.public+name, 0, 0)
         return cls.decrypt_kpkey(privkey, pubkey, result)
 
     @classmethod
     def store_key_slot(cls, dongle, slot, key):
-        apdu = cls.apdu(STORE_KEY, slot, 0, key, 0)
-        dongle.exchange(apdu)
+        dongle.apdu_exchange(STORE_KEY, key, slot, 0)
 
     @classmethod
     def get_key_slot(cls, dongle, slot):
         privkey, pubkey = cls.gen_x25519_keypair()
-        apdu = cls.apdu(GET_KEY, slot, 0, pubkey.public, 32*2)
-        result = dongle.exchange(apdu)
+        result = dongle.apdu_exchange(GET_KEY, pubkey.public, slot, 0)
         return cls.decrypt_kpkey(privkey, pubkey, result)
 
     @classmethod
     def get_valid_slots(cls, dongle):
-        apdu = cls.apdu(GET_VALID_KEY_SLOTS, 0, 0, b"", 10)
-        slots = dongle.exchange(apdu)
+        slots = dongle.apdu_exchange(GET_VALID_KEY_SLOTS, b"", 0, 0)
         slots = struct.unpack("<B", slots)[0]
         ret = []
         s = 0
@@ -46,14 +42,6 @@ class PyKPL:
             slots >>= 1
             s += 1
         return ret
-
-    # Helpers
-    @staticmethod
-    def apdu(ins, p1, p2, data, le):
-        msg = bytes((0xE0,ins,p1,p2,len(data)))
-        msg += data
-        msg += bytes((le,))
-        return msg
 
     # X25519 exchange helpers
     @staticmethod
@@ -79,4 +67,4 @@ class PyKPL:
 
     @staticmethod
     def connect(port):
-        return getDongleTCP(server="127.0.0.1", port=port, debug=True)
+        return LedgerClient(device=TcpDevice("127.0.0.1:%d" % port))

@@ -1,6 +1,5 @@
 import unittest
 import random
-import ledgerblue
 from pykpl import PyKPL
 from libkpl import LibKPL
 
