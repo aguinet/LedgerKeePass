@@ -134,7 +134,6 @@ and then ``libkpl`` itself.
 * potentially fix the SLIP21 path
 * document the application protocol
 * KeepassXC GUI for key slots
-* find a proper C/C++ library to communicate with ledger devices
 * test on actual devices!
 * make an icon for the app :)
 

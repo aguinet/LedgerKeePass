@@ -12,7 +12,9 @@ enum Result: int {
   BAD_LENGTH = -3,
   APP_EXCEPTION = -4,
   OUT_OF_MEMORY = -5,
-  X25519_FAIL = -6
+  X25519_FAIL = -6,
+  TRANSPORT_ERROR = -7,
+  CONNECTION_FAILED = -8,
 };
 
 struct ErrorTag { };

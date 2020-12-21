@@ -1,3 +1,4 @@
+#include <kpl/ledger_device.h>
 #include <kpl/kpl.h>
 #include <iostream>
 #include <vector>
@@ -28,10 +29,16 @@ int main(int argc, char** argv)
   const uint8_t Slot = atoi(argv[1]);
   const auto Key = fromHex(argv[2]);
 
+  auto Dev = kpl::LedgerDevice::getFirstDevice();
+  if (!Dev) {
+    fprintf(stderr, "Unable to find a Ledger device!\n");
+    return 1;
+  }
+  fprintf(stderr, "Using device '%s'\n", Dev->name().c_str());
   kpl::Version AppVer;
-  auto EKPL = kpl::KPL::getWithFirstDongle(AppVer);
+  auto EKPL = kpl::KPL::fromDevice(std::move(Dev), AppVer);
   if (!EKPL) {
-    std::cerr << "Unable to connect to device: " << EKPL.errorValue() << std::endl;
+    fprintf(stderr, "Error while initializing connection: %d!\n", EKPL.errorValue());
     return 1;
   }
   auto& KPL = EKPL.get();

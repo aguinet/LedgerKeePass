@@ -8,6 +8,7 @@ install(DIRECTORY include/kpl DESTINATION include)
 install(FILES
   cmake/kpl-config.cmake
   cmake/Findsodium.cmake
+  cmake/FindHIDAPI.cmake
   DESTINATION lib/cmake)
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")

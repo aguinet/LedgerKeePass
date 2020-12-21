@@ -1,4 +1,5 @@
 #include <kpl/kpl.h>
+#include <kpl/ledger_device.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -11,10 +12,16 @@ int main(int argc, char** argv)
   }
   const char* Name = argv[1];
 
+  auto Dev = kpl::LedgerDevice::getFirstDevice();
+  if (!Dev) {
+    fprintf(stderr, "Unable to find a Ledger device!\n");
+    return 1;
+  }
+  fprintf(stderr, "Using device '%s'\n", Dev->name().c_str());
   kpl::Version AppVer;
-  auto EKPL = kpl::KPL::getWithFirstDongle(AppVer);
+  auto EKPL = kpl::KPL::fromDevice(std::move(Dev), AppVer);
   if (!EKPL) {
-    fprintf(stderr, "Unable to connect to device: %d!\n", EKPL.errorValue());
+    fprintf(stderr, "Error while initializing connection: %d!\n", EKPL.errorValue());
     return 1;
   }
   auto& KPL = EKPL.get();

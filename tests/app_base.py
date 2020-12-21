@@ -1,9 +1,7 @@
 import unittest
 import random
-from pykpl import PyKPL
-from libkpl import LibKPL
 
-from app_case import RunSpeculos
+from run_speculos import RunSpeculos
 
 TXT_KEEPASS_OPEN_NAME = "Keepass open name"
 TXT_KEEPASS_OPEN_SLOT = "Keepass open slot"
@@ -94,12 +92,3 @@ class BaseTestCase:
                 self.API.store_key_slot(dongle, s, key)
             recvslots = self.API.get_valid_slots(dongle)
             self.assertEqual(slots, recvslots)
-
-class AppPyTestCase(BaseTestCase, unittest.TestCase):
-    API = PyKPL
-
-class AppLibTestCase(BaseTestCase, unittest.TestCase):
-    API = LibKPL
-
-if __name__ == "__main__":
-    unittest.main()
