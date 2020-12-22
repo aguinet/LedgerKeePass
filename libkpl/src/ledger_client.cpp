@@ -51,9 +51,6 @@ APDUStream::~APDUStream() {
   wipe();
 }
 
-// WARNING: this should *not* go into the inline definition of the class,
-// because we need the actual definition of LedgerDevice for the destructor of
-// std::unique_ptr<LedgerDevice>.
 LedgerClient::~LedgerClient() = default;
 
 APDUStream LedgerClient::apduStream(uint8_t Ins, uint8_t P1, uint8_t P2)
@@ -63,7 +60,7 @@ APDUStream LedgerClient::apduStream(uint8_t Ins, uint8_t P1, uint8_t P2)
 
 bool LedgerClient::rawExchange(LedgerAnswerBase& Out, uint8_t const* Data, const size_t DataLen, unsigned TimeoutMS)
 {
-  return Dev_->exchange(Out, Data, DataLen, TimeoutMS);
+  return dev().exchange(Out, Data, DataLen, TimeoutMS);
 }
 
 } // kpl

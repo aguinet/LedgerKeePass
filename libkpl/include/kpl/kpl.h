@@ -13,6 +13,7 @@
 namespace kpl {
 
 class LedgerDevice;
+struct KPLWithDevice;
 
 struct KPL
 {
@@ -26,8 +27,7 @@ struct KPL
   static constexpr inline size_t maxNameSize() { return KPL_MAX_NAME_SIZE; }
 
   // If error is BAD_PROTOCOL_VERSION, app version is filled in AppVer.
-  static ErrorOr<KPL> fromDevice(std::unique_ptr<LedgerDevice> Device, Version& AppVer, unsigned TimeoutMS = 0);
-  static ErrorOr<KPL> getWithFirstDevice(Version& AppVer, unsigned TimeoutMS = 0);
+  static ErrorOr<KPL> fromDevice(LedgerDevice& Device, Version& AppVer, unsigned TimeoutMS = 0);
 
   Result setKey(uint8_t Slot, uint8_t const* Key, const size_t KeyLen, unsigned TimeoutMS = 0);
   Result getKey(uint8_t Slot, uint8_t* Out, size_t OutLen, unsigned TimeoutMS = 0);
@@ -37,7 +37,7 @@ struct KPL
   Version const& appVer() const { return AppVer_; }
 
 private:
-  KPL(std::unique_ptr<LedgerDevice> D);
+  KPL(LedgerDevice& D);
 
   void close();
 

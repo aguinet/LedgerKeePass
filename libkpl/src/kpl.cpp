@@ -48,18 +48,18 @@ static bool X25519DecryptKey(uint8_t* Key,
 
 namespace kpl {
 
-KPL::KPL(std::unique_ptr<LedgerDevice> Dev):
-  Client_(std::move(Dev))
+KPL::KPL(LedgerDevice& Dev):
+  Client_(Dev)
 { }
 
 KPL::~KPL() = default;
 
-ErrorOr<KPL> KPL::fromDevice(std::unique_ptr<LedgerDevice> Device, Version& AppVer, unsigned TimeoutMS)
+ErrorOr<KPL> KPL::fromDevice(LedgerDevice& Device, Version& AppVer, unsigned TimeoutMS)
 {
-  if (!Device->connect()) {
+  if (!Device.connect()) {
     return {ErrorTag{}, Result::CONNECTION_FAILED};
   }
-  KPL Ret(std::move(Device));
+  KPL Ret(Device);
 
   Result Res = Ret.fillAppVersion(TimeoutMS);
   if (Res != Result::SUCCESS) {

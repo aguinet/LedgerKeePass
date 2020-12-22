@@ -41,8 +41,8 @@ private:
 };
 
 struct LedgerClient {
-  LedgerClient(std::unique_ptr<LedgerDevice> Dev, uint8_t CLA = 0xE0):
-    Dev_(std::move(Dev)), CLA_(CLA)
+  LedgerClient(LedgerDevice& Dev, uint8_t CLA = 0xE0):
+    Dev_(Dev), CLA_(CLA)
   { }
   LedgerClient(LedgerClient&&) = default;
   LedgerClient& operator=(LedgerClient&&) = default;
@@ -51,8 +51,10 @@ struct LedgerClient {
   APDUStream apduStream(uint8_t Ins, uint8_t P1 = 0, uint8_t P2 = 0);
   bool rawExchange(LedgerAnswerBase& Out, uint8_t const* Data = nullptr, const size_t DataLen = 0, unsigned TimeoutMS = 0);
 
+  LedgerDevice& dev() { return Dev_; }
+
 private:
-  std::unique_ptr<LedgerDevice> Dev_;
+  LedgerDevice& Dev_;
   uint8_t CLA_;
 };
 

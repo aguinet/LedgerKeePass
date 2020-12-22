@@ -14,7 +14,7 @@ int main(int argc, char** argv)
   }
   fprintf(stderr, "Using device '%s'\n", Dev->name().c_str());
   kpl::Version AppVer;
-  auto EKPL = kpl::KPL::fromDevice(std::move(Dev), AppVer);
+  auto EKPL = kpl::KPL::fromDevice(*Dev, AppVer);
   if (!EKPL) {
     fprintf(stderr, "Error while initializing connection: %d!\n", EKPL.errorValue());
     return 1;
