@@ -26,6 +26,7 @@ protected:
 
 private:
   LedgerDeviceTCP(const char* Host, uint16_t Port);
+  void close();
 
   bool send(uint8_t const* Data, size_t DataLen);
   bool read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS = 0);

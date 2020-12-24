@@ -26,12 +26,12 @@ APDUStream::APDUStream(LedgerClient& Client, uint8_t CLA, uint8_t Ins, uint8_t P
   Buf_[APDU_LEN_IDX] = 0; // will be fixed afterwards
 }
 
-bool APDUStream::exchange(LedgerAnswerBase& Out, unsigned timeout_ms)
+bool APDUStream::exchange(LedgerAnswerBase& Out, unsigned TimeoutMS)
 {
   assert(Buf_.size() >= APDU_HEADER_SIZE && "object already exchanged");
 
   Buf_[APDU_LEN_IDX] = Buf_.size()-APDU_HEADER_SIZE;
-  const bool Ret = Client_.rawExchange(Out, &Buf_[0], Buf_.size());
+  const bool Ret = Client_.rawExchange(Out, &Buf_[0], Buf_.size(), TimeoutMS);
   wipe();
   if (!Ret) {
     return false;

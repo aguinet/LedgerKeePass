@@ -72,7 +72,7 @@ std::string LedgerDeviceUSB::name() const
 bool LedgerDeviceUSB::connect()
 {
   if (HIDDev_) {
-    return true;
+    close();
   }
   HIDDev_ = hid_open_path(Path_.c_str());
   return HIDDev_ != nullptr;
@@ -136,7 +136,8 @@ bool LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
   if (OutLen > 0xFFFF) {
     return false;
   }
-  if (hid_read(HIDDev_, Buf, sizeof(Buf)) != sizeof(Buf)) {
+  const int ReadTimeout = (TimeoutMS > 0) ? TimeoutMS : -1;
+  if (hid_read_timeout(HIDDev_, Buf, sizeof(Buf), ReadTimeout) != sizeof(Buf)) {
     sodium_memzero(Buf, sizeof(Buf));
     return false;
   }
@@ -161,7 +162,7 @@ bool LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
     if (OutLen == 0) {
       break;
     }
-    if (hid_read(HIDDev_, Buf, sizeof(Buf)) != sizeof(Buf)) {
+    if (hid_read_timeout(HIDDev_, Buf, sizeof(Buf), ReadTimeout) != sizeof(Buf)) {
       sodium_memzero(Buf, sizeof(Buf));
       return false;
     }

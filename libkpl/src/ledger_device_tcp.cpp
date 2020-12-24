@@ -20,8 +20,14 @@ LedgerDeviceTCP::LedgerDeviceTCP(const char* Host, uint16_t Port):
 
 LedgerDeviceTCP::~LedgerDeviceTCP()
 {
+  close();
+}
+
+void LedgerDeviceTCP::close()
+{
   if (FD_ >= 0) {
-    close(FD_);
+    ::close(FD_);
+    FD_ = -1;
   }
 }
 
@@ -39,7 +45,7 @@ std::string LedgerDeviceTCP::name() const
 bool LedgerDeviceTCP::connect()
 {
   if (FD_ >= 0) {
-    return true;
+    close();
   }
   struct in_addr inaddr;
   if (inet_aton(Host_.c_str(), &inaddr) == 0) {
@@ -54,7 +60,7 @@ bool LedgerDeviceTCP::connect()
   addrtcp.sin_addr = inaddr;
   addrtcp.sin_port = htons(Port_);
   if (::connect(sock, (struct sockaddr*)&addrtcp, sizeof(addrtcp)) != 0) {
-    close(sock);
+    ::close(sock);
     return false;
   }
   FD_ = sock;
