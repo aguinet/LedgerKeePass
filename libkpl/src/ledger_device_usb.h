@@ -32,7 +32,7 @@ private:
 
   void close();
   Result send(uint8_t const* Data, size_t DataLen);
-  Result read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS = 0);
+  Result read(uint8_t* Out, size_t* OutLen, unsigned TimeoutMS = 0);
 
   std::string Path_;
   std::string Manufacturer_;

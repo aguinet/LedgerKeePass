@@ -86,7 +86,13 @@ Result LedgerDeviceUSB::exchange(LedgerAnswerBase& Out,
   if (Res != Result::SUCCESS) {
     return Res;
   }
-  return read(Out.buf_begin(), Out.bufSize(), TimeoutMS);
+  size_t RecvLen = Out.bufSize();
+  Res = read(Out.buf_begin(), &RecvLen, TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
+  }
+  Out.resize(RecvLen);
+  return Result::SUCCESS;
 }
 
 Result LedgerDeviceUSB::send(uint8_t const* Data, size_t DataLen)
@@ -130,9 +136,9 @@ Result LedgerDeviceUSB::send(uint8_t const* Data, size_t DataLen)
   return Result::SUCCESS;
 }
 
-Result LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
+Result LedgerDeviceUSB::read(uint8_t* Out, size_t* OutLen, unsigned TimeoutMS)
 {
-  if (OutLen > 0xFFFF) {
+  if (*OutLen > 0xFFFF) {
     return Result::LIB_BAD_LENGTH;
   }
 
@@ -150,18 +156,19 @@ Result LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
   if (Seq != 0) {
     return Result::TRANSPORT_USB_BAD_SEQ;
   }
-  uint16_t InLen = intmem::loadu_be<uint16_t>(&Buf[5]);
-  if (InLen != OutLen) {
+  size_t InLen = intmem::loadu_be<uint16_t>(&Buf[5]);
+  if (InLen > *OutLen) {
     return Result::PROTOCOL_BAD_LENGTH;
   }
+  *OutLen = InLen;
   auto It = &Buf[7];
   uint16_t SeqRef = 1;
   while (true) {
-    const size_t Len = std::min(OutLen, (size_t)std::distance(It, std::end(Buf)));
+    const size_t Len = std::min(InLen, (size_t)std::distance(It, std::end(Buf)));
     memcpy(Out, It, Len);
     Out += Len;
-    OutLen -= Len;
-    if (OutLen == 0) {
+    InLen -= Len;
+    if (InLen == 0) {
       break;
     }
     if (hid_read_timeout(HIDDev_, Buf, sizeof(Buf), ReadTimeout) != sizeof(Buf)) {
