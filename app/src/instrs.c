@@ -5,6 +5,7 @@
 #include "approve.h"
 #include "menu.h"
 #include <kpl/kpl_csts.h>
+#include <kpl/app_errors.h>
 #include <assert.h>
 
 static void handleGetAppConfiguration(uint8_t slot, uint8_t p2, uint8_t const* data, uint8_t data_len, volatile unsigned int *flags, volatile unsigned int *tx)
@@ -13,7 +14,7 @@ static void handleGetAppConfiguration(uint8_t slot, uint8_t p2, uint8_t const* d
   G_io_apdu_buffer[1] = LEDGER_MINOR_VERSION;
   G_io_apdu_buffer[2] = LEDGER_PATCH_VERSION;
   *tx = 3;
-  THROW(0x9000);
+  THROW(KPL_SW_SUCCESS);
 }
 
 static struct {
@@ -40,8 +41,8 @@ static void handleStoreKeyConfirmErase()
   explicit_bzero(&handleStoreKeyConfirmEraseArgs_,
     sizeof(handleStoreKeyConfirmEraseArgs_));
 
-  G_io_apdu_buffer[0] = 0x90;
-  G_io_apdu_buffer[1] = 0x00;
+  G_io_apdu_buffer[0] = (KPL_SW_SUCCESS)>>8;
+  G_io_apdu_buffer[1] = (KPL_SW_SUCCESS&0xFF);
   io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
 }
 
@@ -69,7 +70,7 @@ static void handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const* data, uint8_
 
   storeKeySlot(slot, data);
   *tx = 0;
-  THROW(0x9000);
+  THROW(KPL_SW_SUCCESS);
 }
 
 static struct {
@@ -98,8 +99,8 @@ static void handleGetKeyAfterApprove()
   }
 
   uint8_t tx = X25519_PTSIZE+KPL_KEY_SIZE;
-  G_io_apdu_buffer[tx++] = 0x90;
-  G_io_apdu_buffer[tx++] = 0x00;
+  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS)>>8;
+  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS&0xFF);
   io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
@@ -109,7 +110,7 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const* data, uint8_t 
     THROW(INVALID_PARAMETER);
   }
   if (!is_key_valid(slot)) {
-    THROW(INVALID_PARAMETER);
+    THROW(KPL_SW_EMPTY_SLOT);
   }
   GetKeyAfterApproveArgs_.Slot = slot;
   memcpy(GetKeyAfterApproveArgs_.caller_pub, data, X25519_PTSIZE);
@@ -146,8 +147,8 @@ static void handleGetKeyFromNameAfterApprove()
   }
 
   uint8_t tx = X25519_PTSIZE+KPL_KEY_SIZE;
-  G_io_apdu_buffer[tx++] = 0x90;
-  G_io_apdu_buffer[tx++] = 0x00;
+  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS)>>8;
+  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS&0xFF);
   io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
@@ -178,7 +179,7 @@ static void handleGetValidSlots(uint8_t p1, uint8_t p2, uint8_t const* data, uin
 {
   G_io_apdu_buffer[0] = N_storage.key_valids;
   *tx = 1;
-  THROW(0x9000);
+  THROW(KPL_SW_SUCCESS);
 }
 
 static handleInstrFunTy Funcs[] = {

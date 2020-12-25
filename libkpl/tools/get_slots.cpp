@@ -5,21 +5,15 @@
 #include <cstring>
 #include <vector>
 
+#include "utils.h"
+
 int main(int argc, char** argv)
 {
-  auto Dev = kpl::LedgerDevice::getFirstDevice();
-  if (!Dev) {
-    fprintf(stderr, "Unable to find a Ledger device!\n");
+  auto KPLDev = getFirstDeviceKPL();
+  if (!KPLDev) {
     return 1;
   }
-  fprintf(stderr, "Using device '%s'\n", Dev->name().c_str());
-  kpl::Version AppVer;
-  auto EKPL = kpl::KPL::fromDevice(*Dev, AppVer);
-  if (!EKPL) {
-    fprintf(stderr, "Error while initializing connection: %d!\n", EKPL.errorValue());
-    return 1;
-  }
-  auto& KPL = EKPL.get();
+  auto& KPL = KPLDev.kpl();
 
   std::vector<uint8_t> Slots;
   auto Res = KPL.getValidKeySlots(Slots);

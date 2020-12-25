@@ -19,6 +19,7 @@
 #include "instrs.h"
 
 #include <kpl/kpl_csts.h>
+#include <kpl/app_errors.h>
 
 unsigned char G_io_seproxyhal_spi_buffer[IO_SEPROXYHAL_BUFFER_SIZE_B];
 
@@ -37,12 +38,12 @@ static void handleApdu(volatile unsigned int *flags, volatile unsigned int *tx) 
   BEGIN_TRY {
     TRY {
       if (G_io_apdu_buffer[OFFSET_CLA] != CLA) {
-        THROW(0x6E00);
+        THROW(KPL_SW_INVALID_CLS);
       }
 
       const handleInstrFunTy F = getHandleInstr(G_io_apdu_buffer[OFFSET_INS]);
       if (!F) {
-        THROW(0x6D00);
+        THROW(KPL_SW_UNKNOWN_INSTR);
       }
       const uint8_t len = G_io_apdu_buffer[OFFSET_LC];
       if (len > (IO_APDU_BUFFER_SIZE-OFFSET_CDATA)) {
@@ -69,7 +70,6 @@ static void handleApdu(volatile unsigned int *flags, volatile unsigned int *tx) 
           sw = 0x6800 | (e & 0x7FF);
           break;
       }
-      // Unexpected exception => report
       G_io_apdu_buffer[*tx] = sw >> 8;
       G_io_apdu_buffer[*tx + 1] = sw;
       *tx += 2;

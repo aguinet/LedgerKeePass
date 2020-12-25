@@ -3,6 +3,8 @@
 
 #include <sodium.h>
 
+#include <kpl/app_errors.h>
+#include <kpl/errors.h>
 #include <kpl/kpl.h>
 #include <kpl/ledger_answer.h>
 #include <kpl/ledger_device.h>
@@ -48,6 +50,24 @@ static bool X25519DecryptKey(uint8_t* Key,
 
 namespace kpl {
 
+static Result parseAppSW(int SW)
+{
+  switch (SW) {
+    case KPL_SW_SUCCESS:
+      return Result::SUCCESS;
+    case KPL_SW_UNKNOWN_INSTR:
+    case KPL_SW_INVALID_CLS:
+    case KPL_SW_INVALID_PARAMETER:
+      return Result::PROTOCOL_BAD_PARAM;
+    case KPL_SW_UNAUTHORIZED_ACCESS:
+      return Result::APP_UNAUTHORIZED_ACCESS;
+    case KPL_SW_EMPTY_SLOT:
+      return Result::APP_EMPTY_SLOT;
+    default:
+      return Result::APP_UNKNOWN_ERROR;
+  }
+}
+
 KPL::KPL(LedgerDevice& Dev):
   Client_(Dev)
 { }
@@ -56,12 +76,13 @@ KPL::~KPL() = default;
 
 ErrorOr<KPL> KPL::fromDevice(LedgerDevice& Device, Version& AppVer, unsigned TimeoutMS)
 {
-  if (!Device.connect()) {
-    return {ErrorTag{}, Result::CONNECTION_FAILED};
+  auto Res = Device.connect();
+  if (Res != Result::SUCCESS) {
+    return {ErrorTag{}, Res};
   }
   KPL Ret(Device);
 
-  Result Res = Ret.fillAppVersion(TimeoutMS);
+  Res = Ret.fillAppVersion(TimeoutMS);
   if (Res != Result::SUCCESS) {
     return {ErrorTag{}, Res};
   }
@@ -69,7 +90,7 @@ ErrorOr<KPL> KPL::fromDevice(LedgerDevice& Device, Version& AppVer, unsigned Tim
 
   const auto LibVer = Version::lib();
   if (!LibVer.isProtocolCompatible(Ret.AppVer_)) {
-    return {ErrorTag{}, Result::BAD_PROTOCOL_VERSION};
+    return {ErrorTag{}, Result::PROTOCOL_BAD_VERSION};
   }
   return {std::move(Ret)};
 }
@@ -77,15 +98,16 @@ ErrorOr<KPL> KPL::fromDevice(LedgerDevice& Device, Version& AppVer, unsigned Tim
 Result KPL::setKey(uint8_t Slot, uint8_t const* Key, const size_t KeyLen, unsigned TimeoutMS)
 {
   if (KeyLen != keySize()) {
-    return Result::BAD_LENGTH;
+    return Result::LIB_BAD_LENGTH;
   }
   auto APDU = Client_.apduStream(Instrs::STORE_KEY, Slot)
                      .append(Key, KeyLen);
   LedgerAnswer<0> Ans;
-  if (!APDU.exchange(Ans, TimeoutMS)) {
-    return Result::TRANSPORT_ERROR;
+  auto Res = APDU.exchange(Ans, TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
-  return (Ans.SW() == 0x9000) ? Result::SUCCESS : Result::APP_EXCEPTION;
+  return parseAppSW(Ans.SW());
 }
 
 static Result sendKeyApduAndDecrypt(LedgerClient& Client, uint8_t* Out, APDUStream& APDU, X25519Scalar const& OwnPrivKey, X25519Pt const& OwnPubKey, unsigned TimeoutMS)
@@ -93,14 +115,16 @@ static Result sendKeyApduAndDecrypt(LedgerClient& Client, uint8_t* Out, APDUStre
   int SW;
   constexpr size_t AnsLen = sizeof(X25519Pt) + KPL_KEY_SIZE;
   LedgerAnswer<AnsLen> Ans;
-  if (!APDU.exchange(Ans, TimeoutMS)) {
-    return Result::TRANSPORT_ERROR;
+  auto Res = APDU.exchange(Ans, TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
-  if (Ans.SW() != 0x9000) {
-    return Result::APP_EXCEPTION;
+  Res = parseAppSW(Ans.SW());
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
   if (Ans.dataSize() != AnsLen) {
-    return Result::BAD_LENGTH;
+    return Result::PROTOCOL_BAD_LENGTH;
   }
 
   // Decrypt
@@ -108,7 +132,7 @@ static Result sendKeyApduAndDecrypt(LedgerClient& Client, uint8_t* Out, APDUStre
   memcpy(&AppPubKey[0], Ans.data_begin(), sizeof(AppPubKey));
   memcpy(Out, Ans.data_begin() + sizeof(AppPubKey), KPL_KEY_SIZE);
   if (!X25519DecryptKey(Out, AppPubKey, OwnPubKey, OwnPrivKey)) {
-    return Result::X25519_FAIL;
+    return Result::LIB_X25519_FAIL;
   }
 
   return Result::SUCCESS;
@@ -117,7 +141,7 @@ static Result sendKeyApduAndDecrypt(LedgerClient& Client, uint8_t* Out, APDUStre
 Result KPL::getKey(uint8_t Slot, uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
 {
   if (OutLen != keySize()) {
-    return Result::BAD_LENGTH;
+    return Result::LIB_BAD_LENGTH;
   }
 
   X25519Scalar OwnPrivKey;
@@ -136,7 +160,7 @@ Result KPL::getKeyFromName(const char* Name, uint8_t* Out, const size_t OutLen, 
 {
   const size_t NameLen = strlen(Name);
   if (NameLen >= maxNameSize() || OutLen != keySize()) {
-    return Result::BAD_LENGTH;
+    return Result::LIB_BAD_LENGTH;
   }
 
   X25519Scalar OwnPrivKey;
@@ -155,14 +179,16 @@ Result KPL::getKeyFromName(const char* Name, uint8_t* Out, const size_t OutLen, 
 Result KPL::fillAppVersion(unsigned TimeoutMS)
 {
   LedgerAnswer<3> Buf;
-  if (!Client_.apduStream(Instrs::GET_APP_CONFIGURATION).exchange(Buf, TimeoutMS)) {
-    return Result::TRANSPORT_ERROR;
+  auto Res = Client_.apduStream(Instrs::GET_APP_CONFIGURATION).exchange(Buf, TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
-  if (Buf.SW() != 0x9000) {
-    return Result::APP_EXCEPTION;
+  Res = parseAppSW(Buf.SW());
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
   if (Buf.dataSize() != 3) {
-    return Result::BAD_LENGTH;
+    return Result::PROTOCOL_BAD_LENGTH;
   }
   AppVer_ = Version{Buf[0], Buf[1], Buf[2]};
   return Result::SUCCESS;
@@ -171,14 +197,16 @@ Result KPL::fillAppVersion(unsigned TimeoutMS)
 Result KPL::getValidKeySlots(std::vector<uint8_t>& Out, unsigned TimeoutMS)
 {
   LedgerAnswer<1> Buf;
-  if (!Client_.apduStream(Instrs::GET_VALID_KEY_SLOTS).exchange(Buf, TimeoutMS)) {
-    return Result::TRANSPORT_ERROR;
+  auto Res = Client_.apduStream(Instrs::GET_VALID_KEY_SLOTS).exchange(Buf, TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
-  if (Buf.SW() != 0x9000) {
-    return Result::APP_EXCEPTION;
+  Res = parseAppSW(Buf.SW());
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
   if (Buf.dataSize() != 1) {
-    return Result::BAD_LENGTH;
+    return Result::PROTOCOL_BAD_LENGTH;
   }
   Out.reserve(slotCount());
   uint8_t Slots = Buf[0];

@@ -1,9 +1,11 @@
 #include <kpl/ledger_device.h>
 #include <kpl/kpl.h>
-#include <iostream>
+#include <cstdio>
 #include <vector>
 #include <cstring>
 #include <ctype.h>
+
+#include "utils.h"
 
 static std::vector<uint8_t> fromHex(const char* Hex)
 {
@@ -23,31 +25,23 @@ static std::vector<uint8_t> fromHex(const char* Hex)
 int main(int argc, char** argv)
 {
   if (argc <= 2) {
-    std::cerr << "Usage: " << argv[0] << " slot key" << std::endl;
+    fprintf(stderr, "Usage: %s slot key\n", argv[0]);
     return 1;
   }
   const uint8_t Slot = atoi(argv[1]);
   const auto Key = fromHex(argv[2]);
 
-  auto Dev = kpl::LedgerDevice::getFirstDevice();
-  if (!Dev) {
-    fprintf(stderr, "Unable to find a Ledger device!\n");
+  auto KPLDev = getFirstDeviceKPL();
+  if (!KPLDev) {
     return 1;
   }
-  fprintf(stderr, "Using device '%s'\n", Dev->name().c_str());
-  kpl::Version AppVer;
-  auto EKPL = kpl::KPL::fromDevice(*Dev, AppVer);
-  if (!EKPL) {
-    fprintf(stderr, "Error while initializing connection: %d!\n", EKPL.errorValue());
-    return 1;
-  }
-  auto& KPL = EKPL.get();
+  auto& KPL = KPLDev.kpl();
 
   auto Res = KPL.setKey(Slot, &Key[0], Key.size());
   if (Res != kpl::Result::SUCCESS) {
-    std::cerr << "Unable to set key: " << Res << std::endl;
+    fprintf(stderr, "Unable to set key (%d): %s.", Res, kpl::errorStr(Res)); 
     return 1;
   }
-  std::cout << "Key set on slot " << (int)Slot << "." << std::endl;
+  printf("Key set on slot %d.\n", Slot);
   return 0;
 }

@@ -1,6 +1,7 @@
 #include "os.h"
 #include "menu.h"
 #include "approve.h"
+#include <kpl/app_errors.h>
 
 char ApproveLine1[32] = {0}; 
 char ApproveLine2[32] = {0};
@@ -37,8 +38,8 @@ static approve_callback_ty approve_cb_;
 
 static void touch_deny()
 {
-  G_io_apdu_buffer[0] = 0x69;
-  G_io_apdu_buffer[1] = 0x85;
+  G_io_apdu_buffer[0] = KPL_SW_UNAUTHORIZED_ACCESS>>8;
+  G_io_apdu_buffer[1] = KPL_SW_UNAUTHORIZED_ACCESS&0xFF;
   // Send back the response, do not restart the event loop
   io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
   // Display back the original UX

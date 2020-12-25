@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 
+#include <kpl/errors.h>
 #include <kpl/ledger_answer.h>
 
 namespace kpl {
@@ -22,13 +23,13 @@ public:
   virtual ~LedgerDevice(); 
 
   virtual std::string name() const = 0;
-  virtual bool connect() = 0;
+  virtual Result connect() = 0;
 
   static VecDevices listDevices();
   static std::unique_ptr<LedgerDevice> getFirstDevice();
 
 protected:
-  virtual bool exchange(LedgerAnswerBase& Out,
+  virtual Result exchange(LedgerAnswerBase& Out,
     uint8_t const* Data, const size_t DataLen,
     unsigned TimeoutMS = 0) = 0;
 };

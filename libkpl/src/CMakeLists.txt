@@ -2,6 +2,7 @@ find_package(sodium REQUIRED)
 find_package(HIDAPI REQUIRED)
 
 add_library(kpl
+  errors.cpp
   ledger_answer.cpp
   ledger_client.cpp
   ledger_device.cpp

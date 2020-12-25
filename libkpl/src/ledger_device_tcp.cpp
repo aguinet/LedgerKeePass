@@ -42,18 +42,18 @@ std::string LedgerDeviceTCP::name() const
   return Name;
 }
 
-bool LedgerDeviceTCP::connect()
+Result LedgerDeviceTCP::connect()
 {
   if (FD_ >= 0) {
     close();
   }
   struct in_addr inaddr;
   if (inet_aton(Host_.c_str(), &inaddr) == 0) {
-    return false;
+    return Result::TRANSPORT_TCP_UNK_HOST;
   }
   int sock = socket(AF_INET, SOCK_STREAM, 0);
   if (sock < 0) {
-    return false;
+    return Result::TRANSPORT_TCP_SOCKET_CREATE_FAIL;
   }
   struct sockaddr_in addrtcp;
   addrtcp.sin_family = AF_INET;
@@ -61,19 +61,19 @@ bool LedgerDeviceTCP::connect()
   addrtcp.sin_port = htons(Port_);
   if (::connect(sock, (struct sockaddr*)&addrtcp, sizeof(addrtcp)) != 0) {
     ::close(sock);
-    return false;
+    return Result::TRANSPORT_CONNECTION_FAILED;
   }
   FD_ = sock;
-  return true;
+  return Result::SUCCESS;
 }
 
-bool LedgerDeviceTCP::send(uint8_t const* Data, size_t DataLen)
+Result LedgerDeviceTCP::send(uint8_t const* Data, size_t DataLen)
 {
   assert(FD_ >= 0);
-  return ::write(FD_, Data, DataLen) == DataLen;
+  return (::write(FD_, Data, DataLen) == DataLen) ? Result::SUCCESS : Result::TRANSPORT_GENERIC_ERROR;
 }
 
-bool LedgerDeviceTCP::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
+Result LedgerDeviceTCP::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
 {
   assert(FD_ >= 0);
 
@@ -88,30 +88,39 @@ bool LedgerDeviceTCP::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
   }
   setsockopt(FD_, SOL_SOCKET, SO_RCVTIMEO, (const char*)&tv, sizeof tv);
   ssize_t ret = ::read(FD_, Out, OutLen);
-  if (ret < 0) {
-    return false;
+  if (ret >= 0 && ret < OutLen) {
+    return Result::TRANSPORT_TIMEOUT;
   }
-  return ((size_t)ret) == OutLen;
+  if (ret < 0) {
+    if (errno == EWOULDBLOCK || errno == EAGAIN) {
+      return Result::TRANSPORT_TIMEOUT;
+    }
+    return Result::TRANSPORT_GENERIC_ERROR;
+  }
+  return (((size_t)ret) == OutLen) ? Result::SUCCESS : Result::TRANSPORT_GENERIC_ERROR;
 }
 
-bool LedgerDeviceTCP::exchange(LedgerAnswerBase& Out,
+Result LedgerDeviceTCP::exchange(LedgerAnswerBase& Out,
     uint8_t const* Data, const size_t DataLen,
     unsigned TimeoutMS)
 {
   uint32_t PktLen = htonl(DataLen);
-  if (!send(reinterpret_cast<uint8_t const*>(&PktLen), sizeof(PktLen))) {
-    return false;
+  auto Res = send(reinterpret_cast<uint8_t const*>(&PktLen), sizeof(PktLen));
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
-  if (!send(Data, DataLen)) {
-    return false;
+  Res = send(Data, DataLen);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
   uint32_t RecvLen;
-  if (!read(reinterpret_cast<uint8_t*>(&RecvLen), sizeof(RecvLen), TimeoutMS)) {
-    return false;
+  Res = read(reinterpret_cast<uint8_t*>(&RecvLen), sizeof(RecvLen), TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
   RecvLen = ntohl(RecvLen)+sizeof(SWTy);
   if (RecvLen > Out.bufSize()) {
-    return false;
+    return Result::PROTOCOL_BAD_LENGTH;
   }
   Out.resize(RecvLen);
   return read(Out.buf_begin(), RecvLen, TimeoutMS);

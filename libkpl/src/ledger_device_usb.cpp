@@ -69,32 +69,33 @@ std::string LedgerDeviceUSB::name() const
   return "USB<" + Manufacturer_ + " " + Product_ + " (#" + Serial_ + ") - " + Path_ + ">";
 }
 
-bool LedgerDeviceUSB::connect()
+Result LedgerDeviceUSB::connect()
 {
   if (HIDDev_) {
     close();
   }
   HIDDev_ = hid_open_path(Path_.c_str());
-  return HIDDev_ != nullptr;
+  return (HIDDev_ == nullptr) ? Result::TRANSPORT_CONNECTION_FAILED : Result::SUCCESS;
 }
 
-bool LedgerDeviceUSB::exchange(LedgerAnswerBase& Out,
+Result LedgerDeviceUSB::exchange(LedgerAnswerBase& Out,
     uint8_t const* Data, const size_t DataLen,
     unsigned TimeoutMS)
 {
-  if (!send(Data, DataLen)) {
-    return false;
+  auto Res = send(Data, DataLen);
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
   return read(Out.buf_begin(), Out.bufSize(), TimeoutMS);
 }
 
-bool LedgerDeviceUSB::send(uint8_t const* Data, size_t DataLen)
+Result LedgerDeviceUSB::send(uint8_t const* Data, size_t DataLen)
 {
   if (!HIDDev_) {
-    return false;
+    return Result::TRANSPORT_GENERIC_ERROR;
   }
   if (DataLen > 0xFFFF) {
-    return false;
+    return Result::LIB_BAD_LENGTH;
   }
   uint8_t Buf[65];
   memset(Buf, 0, sizeof(Buf));
@@ -114,7 +115,7 @@ bool LedgerDeviceUSB::send(uint8_t const* Data, size_t DataLen)
     const size_t PktLen = std::distance(std::begin(Buf), It);
     if (hid_write(HIDDev_, &Buf[0], PktLen) != PktLen) {
       sodium_memzero(&Buf[0], sizeof(Buf));
-      return false;
+      return Result::TRANSPORT_GENERIC_ERROR;
     }
     DataLen -= Len;
     Data += Len;
@@ -126,31 +127,32 @@ bool LedgerDeviceUSB::send(uint8_t const* Data, size_t DataLen)
   while (DataLen > 0);
   
   sodium_memzero(&Buf[0], sizeof(Buf));
-  return true;
+  return Result::SUCCESS;
 }
 
-bool LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
+Result LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
 {
+  if (OutLen > 0xFFFF) {
+    return Result::LIB_BAD_LENGTH;
+  }
+
   uint8_t Buf[64];
   memset(Buf, 0, sizeof(Buf));
-  if (OutLen > 0xFFFF) {
-    return false;
-  }
   const int ReadTimeout = (TimeoutMS > 0) ? TimeoutMS : -1;
   if (hid_read_timeout(HIDDev_, Buf, sizeof(Buf), ReadTimeout) != sizeof(Buf)) {
     sodium_memzero(Buf, sizeof(Buf));
-    return false;
+    return Result::TRANSPORT_TIMEOUT;
   }
   if (Buf[0] != 0x01 || Buf[1] != 0x01 || Buf[2] != 5) {
-    return false;
+    return Result::TRANSPORT_USB_BAD_PACKET;
   }
   const uint16_t Seq = intmem::loadu_be<uint16_t>(&Buf[3]);
   if (Seq != 0) {
-    return false;
+    return Result::TRANSPORT_USB_BAD_SEQ;
   }
   uint16_t InLen = intmem::loadu_be<uint16_t>(&Buf[5]);
   if (InLen != OutLen) {
-    return false;
+    return Result::PROTOCOL_BAD_LENGTH;
   }
   auto It = &Buf[7];
   uint16_t SeqRef = 1;
@@ -164,17 +166,17 @@ bool LedgerDeviceUSB::read(uint8_t* Out, size_t OutLen, unsigned TimeoutMS)
     }
     if (hid_read_timeout(HIDDev_, Buf, sizeof(Buf), ReadTimeout) != sizeof(Buf)) {
       sodium_memzero(Buf, sizeof(Buf));
-      return false;
+      return Result::TRANSPORT_TIMEOUT;
     }
     const uint16_t Seq = intmem::loadu_be<uint16_t>(&Buf[3]);
     if (Seq != SeqRef++) {
       sodium_memzero(Buf, sizeof(Buf));
-      return false;
+      return Result::TRANSPORT_USB_BAD_SEQ;
     }
     It = &Buf[5];
   }
   sodium_memzero(Buf, sizeof(Buf));
-  return true;
+  return Result::SUCCESS;
 }
 
 } // kpl

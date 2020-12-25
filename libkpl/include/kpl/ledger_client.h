@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include <kpl/errors.h>
+
 namespace kpl {
 
 class LedgerDevice;
@@ -26,7 +28,7 @@ struct APDUStream
     return append(&Data[0], Data.size());
   }
 
-  bool exchange(LedgerAnswerBase& Out, unsigned TimeoutMS = 0);
+  Result exchange(LedgerAnswerBase& Out, unsigned TimeoutMS = 0);
 
   ~APDUStream();
 
@@ -49,7 +51,7 @@ struct LedgerClient {
   ~LedgerClient();
 
   APDUStream apduStream(uint8_t Ins, uint8_t P1 = 0, uint8_t P2 = 0);
-  bool rawExchange(LedgerAnswerBase& Out, uint8_t const* Data = nullptr, const size_t DataLen = 0, unsigned TimeoutMS = 0);
+  Result rawExchange(LedgerAnswerBase& Out, uint8_t const* Data = nullptr, const size_t DataLen = 0, unsigned TimeoutMS = 0);
 
   LedgerDevice& dev() { return Dev_; }
 

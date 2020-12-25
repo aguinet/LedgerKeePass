@@ -1,3 +1,4 @@
+#include <kpl/errors.h>
 #include <kpl/ledger_client.h>
 #include <kpl/ledger_device.h>
 #include <kpl/ledger_answer.h>
@@ -26,17 +27,17 @@ APDUStream::APDUStream(LedgerClient& Client, uint8_t CLA, uint8_t Ins, uint8_t P
   Buf_[APDU_LEN_IDX] = 0; // will be fixed afterwards
 }
 
-bool APDUStream::exchange(LedgerAnswerBase& Out, unsigned TimeoutMS)
+Result APDUStream::exchange(LedgerAnswerBase& Out, unsigned TimeoutMS)
 {
   assert(Buf_.size() >= APDU_HEADER_SIZE && "object already exchanged");
 
   Buf_[APDU_LEN_IDX] = Buf_.size()-APDU_HEADER_SIZE;
-  const bool Ret = Client_.rawExchange(Out, &Buf_[0], Buf_.size(), TimeoutMS);
+  const auto Res = Client_.rawExchange(Out, &Buf_[0], Buf_.size(), TimeoutMS);
   wipe();
-  if (!Ret) {
-    return false;
+  if (Res != Result::SUCCESS) {
+    return Res;
   }
-  return Out.bufSize() >= sizeof(SWTy);
+  return (Out.bufSize() >= sizeof(SWTy)) ? Result::SUCCESS : Result::PROTOCOL_BAD_LENGTH;
 }
 
 void APDUStream::wipe()
@@ -58,7 +59,7 @@ APDUStream LedgerClient::apduStream(uint8_t Ins, uint8_t P1, uint8_t P2)
   return APDUStream{*this, CLA_, Ins, P1, P2};
 }
 
-bool LedgerClient::rawExchange(LedgerAnswerBase& Out, uint8_t const* Data, const size_t DataLen, unsigned TimeoutMS)
+Result LedgerClient::rawExchange(LedgerAnswerBase& Out, uint8_t const* Data, const size_t DataLen, unsigned TimeoutMS)
 {
   return dev().exchange(Out, Data, DataLen, TimeoutMS);
 }
