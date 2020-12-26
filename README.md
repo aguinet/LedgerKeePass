@@ -131,7 +131,6 @@ and then ``libkpl`` itself.
 ## TODO
 
 * port & test on Nano X and Blue
-* potentially fix the SLIP21 path
 * document the application protocol
 * KeepassXC GUI for key slots
 * test on actual devices!

@@ -159,7 +159,7 @@ Result KPL::getKey(uint8_t Slot, uint8_t* Out, size_t OutLen, unsigned TimeoutMS
 Result KPL::getKeyFromName(const char* Name, uint8_t* Out, const size_t OutLen, unsigned TimeoutMS)
 {
   const size_t NameLen = strlen(Name);
-  if (NameLen >= maxNameSize() || OutLen != keySize()) {
+  if (NameLen > maxNameSize() || OutLen != keySize()) {
     return Result::LIB_BAD_LENGTH;
   }
 

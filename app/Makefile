@@ -20,7 +20,10 @@ $(error Environment variable BOLOS_SDK is not set)
 endif
 include $(BOLOS_SDK)/Makefile.defines
 
-APP_LOAD_PARAMS= --curve ed25519 --path "44'/1234'" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
+SLIP21_PATH="keepass_s21"
+APP_LOAD_PARAMS= --curve ed25519 --path_slip21 "$(SLIP21_PATH)" --appFlags 0x240 $(COMMON_LOAD_PARAMS)
+
+DEFINES += SLIP21_PATH=\"$(SLIP21_PATH)\" SLIP21_PATH_LEN=11
 
 APPVERSION_M=1
 APPVERSION_N=0

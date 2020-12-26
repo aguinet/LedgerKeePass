@@ -121,23 +121,34 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const* data, uint8_t 
   *flags |= IO_ASYNCH_REPLY;
 }
 
-#define PATH_PREFIX "\x00keepass_seed_"
-#define PATH_PREFIX_LEN 14
+#define SLIP21_PATH_SYSCALL "\x00" SLIP21_PATH
+#define SLIP21_PATH_SYSCALL_LEN (1+SLIP21_PATH_LEN)
+#define SEED_PREFIX "dbname\x00"
+#define SEED_PREFIX_LEN 7
+
 static struct {
-  uint8_t path[256];
+  uint8_t name[SEED_PREFIX_LEN+KPL_MAX_NAME_SIZE];
   uint8_t caller_pub[32];
-  uint8_t path_len;
+  uint8_t name_len;
 } GetKeyFromNameArgs_;
 
 static void handleGetKeyFromNameAfterApprove()
 {
   uint8_t* kpkey = &G_io_apdu_buffer[X25519_PTSIZE];
-  os_perso_derive_node_with_seed_key(HDW_SLIP21, 0,
-      // I don't like this u8 => u32 cast as this sounds UB to me... (and
-      // involves unaligned accesses)
-      (const uint32_t*)GetKeyFromNameArgs_.path, GetKeyFromNameArgs_.path_len,
-      kpkey, NULL,
-      (uint8_t*)"keepass_seed", 12);
+  // Inspired by https://github.com/LedgerHQ/app-bitcoin/blob/liquid/src/btchip_helpers.c#L504
+  CCASSERT(1, SLIP21_PATH_SYSCALL_LEN % 4 == 0);
+  uint32_t path[SLIP21_PATH_SYSCALL_LEN/4];
+  uint8_t hmackey[32];
+  memcpy(path, SLIP21_PATH_SYSCALL, SLIP21_PATH_SYSCALL_LEN);
+  os_perso_derive_node_with_seed_key(HDW_SLIP21, CX_CURVE_256K1,
+      path, sizeof(path),
+      hmackey, NULL,
+      (uint8_t*)"keepass seed", 12);
+
+  // HMAC the name with the computed hmackey. This will be the resulting key.
+  cx_hmac_sha256(hmackey, sizeof(hmackey),
+      GetKeyFromNameArgs_.name, GetKeyFromNameArgs_.name_len,
+      kpkey, KPL_KEY_SIZE);
 
   // Encrypt the resulting key
   uint8_t* own_pubkey = &G_io_apdu_buffer[0];
@@ -162,10 +173,10 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const* data, ui
   data += X25519_PTSIZE;
   data_len -= X25519_PTSIZE;
 
-  uint8_t* path = GetKeyFromNameArgs_.path;
-  memcpy(path, PATH_PREFIX, PATH_PREFIX_LEN);
-  memcpy(&path[PATH_PREFIX_LEN], data, data_len);
-  GetKeyFromNameArgs_.path_len = data_len + PATH_PREFIX_LEN;
+  uint8_t* name = GetKeyFromNameArgs_.name;
+  memcpy(name, SEED_PREFIX, SEED_PREFIX_LEN);
+  memcpy(&name[SEED_PREFIX_LEN], data, data_len);
+  GetKeyFromNameArgs_.name_len = SEED_PREFIX_LEN + data_len;
 
   // Warning: if this string changes, the tests need to be adpated!
   strncpy(ApproveLine1, "Keepass open name", sizeof(ApproveLine1));
