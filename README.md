@@ -137,7 +137,6 @@ and then ``libkpl`` itself.
 * port & test on Nano X and Blue
 * KeepassXC GUI for key slots
 * test on actual devices!
-* make an icon for the app :)
 
 
 [speculos]: https://github.com/LedgerHQ/speculos/
