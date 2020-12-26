@@ -110,6 +110,10 @@ export LEDGER_PROXY_PORT=9999
 
 (By default, [Speculos](speculos) listens on TCP port 9999).
 
+## Protocol
+
+See [protocol.md](protocol.md).
+
 ## Tests
 
 Tests needs Python 3 to run, with some packages:
@@ -131,7 +135,6 @@ and then ``libkpl`` itself.
 ## TODO
 
 * port & test on Nano X and Blue
-* document the application protocol
 * KeepassXC GUI for key slots
 * test on actual devices!
 * make an icon for the app :)
