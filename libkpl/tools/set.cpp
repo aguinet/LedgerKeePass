@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 
   auto Res = KPL.setKey(Slot, &Key[0], Key.size());
   if (Res != kpl::Result::SUCCESS) {
-    fprintf(stderr, "Unable to set key (%d): %s.", Res, kpl::errorStr(Res)); 
+    fprintf(stderr, "Unable to set key (%d): %s.\n", Res, kpl::errorStr(Res)); 
     return 1;
   }
   printf("Key set on slot %d.\n", Slot);

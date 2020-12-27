@@ -14,7 +14,7 @@ const char* errorStr(Result Res)
     case Result::APP_EMPTY_SLOT:
       return "no key exist in slot";
     case Result::APP_UNKNOWN_ERROR:
-      return "unknown application internal error";
+      return "unknown application error. Make sure the Keepass application is running!";
     case Result::LIB_BAD_LENGTH:
       return "bad length provided in the library (internal error)";
     case Result::LIB_OUT_OF_MEMORY:
