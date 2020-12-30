@@ -63,6 +63,8 @@ static Result parseAppSW(int SW)
       return Result::APP_UNAUTHORIZED_ACCESS;
     case KPL_SW_EMPTY_SLOT:
       return Result::APP_EMPTY_SLOT;
+    case KPL_SW_INVALID_NAME:
+      return Result::APP_INVALID_NAME;
     default:
       return Result::APP_UNKNOWN_ERROR;
   }

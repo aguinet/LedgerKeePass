@@ -92,3 +92,8 @@ class BaseTestCase:
                 self.API.store_key_slot(dongle, s, key)
             recvslots = self.API.get_valid_slots(dongle)
             self.assertEqual(slots, recvslots)
+
+    def test_invalid_name(self):
+        with self.run_speculos() as dongle:
+            with self.assertRaises(self.API.exception):
+                self.API.get_key_from_name(dongle, "tést".encode("utf8"))

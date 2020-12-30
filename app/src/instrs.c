@@ -170,6 +170,17 @@ static void handleGetKeyFromNameAfterApprove()
   io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
 }
 
+// All characters must be printable ASCII
+static bool is_name_valid(const uint8_t* buf, size_t len)
+{
+  for (size_t i = 0; i < len; ++i) {
+    const uint8_t v = buf[i];
+    if (v <= 0x1F || v >= 0x7F) {
+      return false;
+    }
+  }
+  return true;
+}
 static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const* data, uint8_t data_len, volatile unsigned int *flags, volatile unsigned int *tx)
 {
   if (data_len <= X25519_PTSIZE || (data_len > (X25519_PTSIZE+KPL_MAX_NAME_SIZE))) {
@@ -179,6 +190,10 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const* data, ui
   memcpy(GetKeyFromNameArgs_.caller_pub, data, X25519_PTSIZE);
   data += X25519_PTSIZE;
   data_len -= X25519_PTSIZE;
+
+  if (!is_name_valid(data, data_len)) {
+    THROW(KPL_SW_INVALID_NAME);
+  }
 
   uint8_t* name = GetKeyFromNameArgs_.name;
   memcpy(name, SEED_PREFIX, SEED_PREFIX_LEN);

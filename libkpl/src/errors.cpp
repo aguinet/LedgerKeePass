@@ -9,6 +9,8 @@ const char* errorStr(Result Res)
       return "no error";
     case Result::DEVICE_NOT_FOUND:
       return "no device found";
+    case Result::APP_INVALID_NAME:
+      return "name can only contain ASCII printable characters";
     case Result::APP_UNAUTHORIZED_ACCESS:
       return "user denied access on the device";
     case Result::APP_EMPTY_SLOT:
