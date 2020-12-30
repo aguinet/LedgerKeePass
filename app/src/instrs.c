@@ -135,20 +135,27 @@ static struct {
 static void handleGetKeyFromNameAfterApprove()
 {
   uint8_t* kpkey = &G_io_apdu_buffer[X25519_PTSIZE];
-  // Inspired by https://github.com/LedgerHQ/app-bitcoin/blob/liquid/src/btchip_helpers.c#L504
-  CCASSERT(1, SLIP21_PATH_SYSCALL_LEN % 4 == 0);
-  uint32_t path[SLIP21_PATH_SYSCALL_LEN/4];
-  uint8_t hmackey[32];
-  memcpy(path, SLIP21_PATH_SYSCALL, SLIP21_PATH_SYSCALL_LEN);
-  os_perso_derive_node_with_seed_key(HDW_SLIP21, CX_CURVE_256K1,
-      path, sizeof(path),
-      hmackey, NULL,
-      (uint8_t*)"keepass seed", 12);
+  // Inspired by https://github.com/LedgerHQ/app-passwords/blob/b64b12b32e4c6bca21c208b97a42e3bd025bc926/src/password_typing.c#L46
+  uint8_t hashName[CX_SHA256_SIZE];
+  cx_hash_sha256(
+    GetKeyFromNameArgs_.name, GetKeyFromNameArgs_.name_len,
+    hashName, sizeof(hashName));
 
-  // HMAC the name with the computed hmackey. This will be the resulting key.
-  cx_hmac_sha256(hmackey, sizeof(hmackey),
-      GetKeyFromNameArgs_.name, GetKeyFromNameArgs_.name_len,
-      kpkey, KPL_KEY_SIZE);
+  CCASSERT(1, CX_SHA256_SIZE % 2 == 0);
+  uint32_t path[1+CX_SHA256_SIZE/2];
+  path[0] = KPL_BIP39_PATH;
+  for (size_t i = 0; i < CX_SHA256_SIZE/2; ++i) {
+    path[i+1] = 0x80000000  |
+      (uint32_t)(hashName[2*i]) |
+      ((uint32_t)(hashName[2*i+1]) << 8);
+  }
+  uint8_t tmp[64];
+  os_perso_derive_node_bip32(CX_CURVE_SECP256K1, path, sizeof(path)/sizeof(uint32_t),
+    tmp, &tmp[32]);
+
+  // Hash the resulting private key and chain code. This will be the resulting key.
+  cx_hash_sha256(tmp, sizeof(tmp), kpkey, KPL_KEY_SIZE);
+  explicit_bzero(tmp, sizeof(tmp));
 
   // Encrypt the resulting key
   uint8_t* own_pubkey = &G_io_apdu_buffer[0];
