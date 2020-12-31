@@ -202,8 +202,11 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const* data, ui
 
   // Warning: if this string changes, the tests need to be adpated!
   strncpy(ApproveLine1, "Keepass open name", sizeof(ApproveLine1));
-  memcpy(ApproveLine2, data, data_len);
-  ApproveLine2[data_len] = 0;
+  CCASSERT(1, sizeof(ApproveLine2) >= KPL_MAX_NAME_SIZE+3);
+  ApproveLine2[0] = '\'';
+  memcpy(&ApproveLine2[1], data, data_len);
+  ApproveLine2[data_len+1] = '\'';
+  ApproveLine2[data_len+2] = 0;
   ui_approval(handleGetKeyFromNameAfterApprove);
   *flags |= IO_ASYNCH_REPLY;
 }
