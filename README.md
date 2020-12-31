@@ -122,19 +122,25 @@ Tests needs Python 3 to run, with some packages:
 pip install -r tests/requirements.txt
 ```
 
-Tests will use the tools build with `libkpl` to test this library. You thus need to specify a `libkpl` build directory to the tests, with the path to the Speculos main script:
+Tests will use the tools build with `libkpl` to test this library. You thus
+need to specify a `libkpl` build directory to the tests, with the path to the
+Speculos main script:
 
 ```
-tests/run.sh /path/to/speculos.py /path/to/libkpl/build
+tests/run.sh /path/to/speculos.py /path/to/libkpl/build nanos
 ```
 
 This will test the application with a pure Python implementation of ``libkpl``,
 and then ``libkpl`` itself.
 
+It also specifies that the application has been compiled for the ``nanos``
+model. To test the ``nanox`` version, replace ``nanos`` by ``nanox`` in the
+``run.sh`` command line.
+
 
 ## TODO
 
-* port & test on Nano X and Blue
+* port & test on Blue
 * KeepassXC GUI for key slots
 * test on actual devices!
 

@@ -3,9 +3,6 @@
 
 #include <kpl/kpl_csts.h>
 
-void display_settings(void);
-
-//////////////////////////////////////////////////////////////////////
 UX_STEP_NOCB(
     ux_idle_flow_1_step, 
     pnn, 

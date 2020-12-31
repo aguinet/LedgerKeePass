@@ -6,6 +6,35 @@
 char ApproveLine1[32] = {0}; 
 char ApproveLine2[32] = {0};
 
+static void touch_okay();
+static void touch_deny();
+
+#ifdef TARGET_NANOX
+UX_STEP_VALID(
+    ux_approval_flow_1_step,
+    pbb,
+    touch_okay(),
+    {
+    &C_icon_validate_14,
+    ApproveLine1,
+    ApproveLine2
+    });
+UX_STEP_VALID(
+    ux_approval_flow_2_step,
+    pb,
+    touch_deny(),
+    {
+    &C_icon_crossmark,
+    "Cancel"
+    });
+
+const ux_flow_step_t* const ux_approval_flow[] = {
+  &ux_approval_flow_1_step,
+  &ux_approval_flow_2_step,
+  FLOW_END_STEP,
+};
+
+#elif defined(TARGET_NANOS)
 static const bagl_element_t bagl_ui_approval_nanos[] = {
   {
     {BAGL_RECTANGLE, 0x00, 0, 0, 128, 32, 0, 0, BAGL_FILL, 0x000000,
@@ -33,8 +62,15 @@ static const bagl_element_t bagl_ui_approval_nanos[] = {
     NULL,
   },
 };
+#endif
 
 static approve_callback_ty approve_cb_;
+
+static void touch_okay()
+{
+  approve_cb_();
+  ui_idle();
+}
 
 static void touch_deny()
 {
@@ -51,8 +87,7 @@ bagl_ui_approval_nanos_button(unsigned int button_mask,
     unsigned int button_mask_counter) {
   switch (button_mask) {
     case BUTTON_EVT_RELEASED | BUTTON_RIGHT:
-      approve_cb_();
-      ui_idle();
+      touch_okay();
       break;
 
     case BUTTON_EVT_RELEASED | BUTTON_LEFT:
@@ -64,5 +99,15 @@ bagl_ui_approval_nanos_button(unsigned int button_mask,
 
 void ui_approval(approve_callback_ty func) {
   approve_cb_ = func;
+#if defined(TARGET_NANOX)
+  // reserve a display stack slot if none yet
+  if(G_ux.stack_count == 0) {
+    ux_stack_push();
+  }
+  ux_flow_init(0, ux_approval_flow, NULL);
+#elif defined(TARGET_NANOS)
   UX_DISPLAY(bagl_ui_approval_nanos, NULL);
+#else
+#error Unsupported target
+#endif
 }

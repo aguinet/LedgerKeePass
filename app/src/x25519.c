@@ -74,9 +74,9 @@ bool X25519EncryptKPKey(uint8_t* kpkey, uint8_t* own_pubkey,
   // libsodium). This will be our keystream.
   cx_blake2b_t h;
   cx_blake2b_init(&h, KPL_KEY_SIZE*8);
-  cx_hash(&h, 0, &ecdhe_secret, sizeof(ecdhe_secret), NULL, 0);
-  cx_hash(&h, 0, caller_pubkey, X25519_PTSIZE, NULL, 0);
-  cx_hash(&h, CX_LAST, own_pubkey, X25519_PTSIZE, keystream, sizeof(keystream));
+  cx_hash((cx_hash_t*)&h, 0, &ecdhe_secret[0], sizeof(ecdhe_secret), NULL, 0);
+  cx_hash((cx_hash_t*)&h, 0, caller_pubkey, X25519_PTSIZE, NULL, 0);
+  cx_hash((cx_hash_t*)&h, CX_LAST, own_pubkey, X25519_PTSIZE, keystream, sizeof(keystream));
 
   // Finally, xor the key with our ephemeral keystream
   for (size_t i = 0; i < KPL_KEY_SIZE; ++i) {

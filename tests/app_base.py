@@ -1,7 +1,7 @@
 import unittest
 import random
 
-from run_speculos import RunSpeculos
+from run_speculos import RunSpeculos, UnsupportedSpeculos
 
 TXT_KEEPASS_OPEN_NAME = "Keepass open name"
 TXT_KEEPASS_OPEN_SLOT = "Keepass open slot"
@@ -26,7 +26,10 @@ def automation_refuse_txt(txts):
 
 class BaseTestCase:
     def run_speculos(self, automation=None):
-        return RunSpeculos(self.API, automation)
+        try:
+            return RunSpeculos(self.API, automation)
+        except UnsupportedSpeculos:
+            self.skipTest("unsupported case for Speculos")
 
     def test_get_key_by_name_accepts(self):
         # If TXT_KEEPASS_OPEN_NAME appears, accepts it.
