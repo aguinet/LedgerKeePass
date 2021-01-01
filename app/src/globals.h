@@ -2,8 +2,8 @@
 #define APP_GLOBALS
 
 #include "os.h"
-#include "ux.h"
 #include "os_io_seproxyhal.h"
+#include "ux.h"
 
 #include <kpl/kpl_csts.h>
 
@@ -24,7 +24,7 @@ typedef struct internalStorage_t {
 } internalStorage_t;
 
 extern const internalStorage_t N_storage_real;
-#define N_storage (*(volatile internalStorage_t*) PIC(&N_storage_real))
+#define N_storage (*(volatile internalStorage_t *)PIC(&N_storage_real))
 
 static inline bool is_key_valid(uint8_t slot) {
   return (N_storage.key_valids >> slot) & 1;
@@ -32,8 +32,8 @@ static inline bool is_key_valid(uint8_t slot) {
 
 static inline void set_key_as_valid(uint8_t slot) {
   uint8_t key_valids = N_storage.key_valids;
-  key_valids |= (1U<<slot);
-  nvm_write((void*)&N_storage.key_valids, &key_valids, sizeof(key_valids));
+  key_valids |= (1U << slot);
+  nvm_write((void *)&N_storage.key_valids, &key_valids, sizeof(key_valids));
 }
 
 #endif

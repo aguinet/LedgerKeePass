@@ -1,29 +1,27 @@
-#include <kpl/ledger_device.h>
-#include <kpl/kpl.h>
 #include <cstdio>
-#include <vector>
 #include <cstring>
 #include <ctype.h>
+#include <kpl/kpl.h>
+#include <kpl/ledger_device.h>
+#include <vector>
 
 #include "utils.h"
 
-static std::vector<uint8_t> fromHex(const char* Hex)
-{
+static std::vector<uint8_t> fromHex(const char *Hex) {
   const size_t Len = strlen(Hex);
   std::vector<uint8_t> Ret;
-  Ret.resize(Len/2);
+  Ret.resize(Len / 2);
   char Buf[3];
   Buf[2] = 0;
-  for (size_t i = 0; i < Len/2; ++i) {
-    Buf[0] = tolower(Hex[2*i]);
-    Buf[1] = tolower(Hex[2*i+1]);
+  for (size_t i = 0; i < Len / 2; ++i) {
+    Buf[0] = tolower(Hex[2 * i]);
+    Buf[1] = tolower(Hex[2 * i + 1]);
     sscanf(Buf, "%02x", &Ret[i]);
   }
   return Ret;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
   if (argc <= 2) {
     fprintf(stderr, "Usage: %s slot key\n", argv[0]);
     return 1;
@@ -35,11 +33,11 @@ int main(int argc, char** argv)
   if (!KPLDev) {
     return 1;
   }
-  auto& KPL = KPLDev.kpl();
+  auto &KPL = KPLDev.kpl();
 
   auto Res = KPL.setKey(Slot, &Key[0], Key.size());
   if (Res != kpl::Result::SUCCESS) {
-    fprintf(stderr, "Unable to set key (%d): %s.\n", Res, kpl::errorStr(Res)); 
+    fprintf(stderr, "Unable to set key (%d): %s.\n", Res, kpl::errorStr(Res));
     return 1;
   }
   printf("Key set on slot %d.\n", Slot);

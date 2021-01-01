@@ -6,17 +6,16 @@
 namespace kpl {
 class LedgerDevice;
 class KPL;
-}
+} // namespace kpl
 
-struct KPLDev
-{
+struct KPLDev {
   KPLDev() = default;
-  KPLDev(KPLDev&&) = default;
-  KPLDev& operator=(KPLDev&&) = default;
+  KPLDev(KPLDev &&) = default;
+  KPLDev &operator=(KPLDev &&) = default;
   ~KPLDev();
 
-  kpl::KPL& kpl() { return *KPL_; }
-  kpl::LedgerDevice& dev() { return *Dev_; }
+  kpl::KPL &kpl() { return *KPL_; }
+  kpl::LedgerDevice &dev() { return *Dev_; }
 
   operator bool() const { return KPL_.get() != nullptr; }
 

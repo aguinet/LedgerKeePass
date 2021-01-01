@@ -3,9 +3,8 @@
 
 namespace kpl {
 
-LedgerAnswerBase::~LedgerAnswerBase()
-{
+LedgerAnswerBase::~LedgerAnswerBase() {
   sodium_memzero(buf_begin(), bufSize());
 }
 
-} // kpl
+} // namespace kpl

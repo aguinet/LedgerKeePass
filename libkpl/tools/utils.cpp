@@ -1,14 +1,13 @@
 #include "utils.h"
-#include <kpl/kpl.h>
 #include <kpl/errors.h>
+#include <kpl/kpl.h>
 #include <kpl/ledger_device.h>
 
 #include <cstdio>
 
 KPLDev::~KPLDev() = default;
 
-KPLDev getFirstDeviceKPL()
-{
+KPLDev getFirstDeviceKPL() {
   KPLDev Ret;
   Ret.Dev_ = kpl::LedgerDevice::getFirstDevice();
   if (!Ret.Dev_) {
@@ -20,7 +19,8 @@ KPLDev getFirstDeviceKPL()
   auto EKPL = kpl::KPL::fromDevice(*Ret.Dev_, AppVer);
   if (!EKPL) {
     const auto errVal = EKPL.errorValue();
-    fprintf(stderr, "Error while initializing connection (%d): %s.\n", errVal, kpl::errorStr(errVal));
+    fprintf(stderr, "Error while initializing connection (%d): %s.\n", errVal,
+            kpl::errorStr(errVal));
     return {};
   }
   Ret.KPL_.reset(new kpl::KPL{std::move(EKPL.get())});

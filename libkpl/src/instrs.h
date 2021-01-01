@@ -3,7 +3,7 @@
 
 namespace kpl {
 
-enum Instrs: uint8_t {
+enum Instrs : uint8_t {
   GET_APP_CONFIGURATION = 0,
   STORE_KEY = 1,
   GET_KEY = 2,
@@ -11,6 +11,6 @@ enum Instrs: uint8_t {
   GET_VALID_KEY_SLOTS = 4
 };
 
-} // kpl
+} // namespace kpl
 
 #endif

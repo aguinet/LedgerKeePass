@@ -7,12 +7,11 @@ namespace kpl {
 
 struct Version {
   Version() = default;
-  Version(Version const&) = default;
-  Version(uint8_t Major, uint8_t Minor, uint8_t Patch):
-    Major_(Major), Minor_(Minor), Patch_(Patch)
-  { }
+  Version(Version const &) = default;
+  Version(uint8_t Major, uint8_t Minor, uint8_t Patch)
+      : Major_(Major), Minor_(Minor), Patch_(Patch) {}
 
-  bool isProtocolCompatible(Version const& O) const {
+  bool isProtocolCompatible(Version const &O) const {
     return protocol() == O.protocol();
   }
 
@@ -26,6 +25,6 @@ private:
   uint8_t Patch_;
 };
 
-} // kpl
+} // namespace kpl
 
 #endif

@@ -1,6 +1,8 @@
 #ifndef APP_INSTRS_H
 #define APP_INSTRS_H
 
+#include <stdint.h>
+
 enum AppInstrs {
   INS_GET_APP_CONFIGURATION = 0,
   INS_STORE_KEY = 1,
@@ -10,14 +12,12 @@ enum AppInstrs {
   INS_LAST
 };
 
-typedef void(*handleInstrFunTy)(
+typedef void (*handleInstrFunTy)(
     // p1,p2,data,datalen
-    uint8_t, uint8_t, uint8_t const*, uint8_t,
+    uint8_t, uint8_t, uint8_t const *, uint8_t,
     // flags,tx
-    volatile unsigned int *, volatile unsigned int *
-);
+    volatile unsigned int *, volatile unsigned int *);
 
 handleInstrFunTy getHandleInstr(uint8_t Ins);
-
 
 #endif

@@ -1,19 +1,18 @@
-#include <kpl/ledger_device.h>
-#include <kpl/kpl.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <kpl/kpl.h>
+#include <kpl/ledger_device.h>
 #include <vector>
 
 #include "utils.h"
 
-int main(int argc, char** argv)
-{
+int main(int argc, char **argv) {
   auto KPLDev = getFirstDeviceKPL();
   if (!KPLDev) {
     return 1;
   }
-  auto& KPL = KPLDev.kpl();
+  auto &KPL = KPLDev.kpl();
 
   std::vector<uint8_t> Slots;
   auto Res = KPL.getValidKeySlots(Slots);
@@ -25,7 +24,7 @@ int main(int argc, char** argv)
     puts("No valid slots!");
     return 0;
   }
-  for (uint8_t S: Slots) {
+  for (uint8_t S : Slots) {
     printf("%d ", S);
   }
   printf("\n");

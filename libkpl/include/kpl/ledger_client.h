@@ -12,54 +12,50 @@ class LedgerDevice;
 class LedgerClient;
 class LedgerAnswerBase;
 
-struct APDUStream
-{
+struct APDUStream {
   friend class LedgerClient;
 
-  APDUStream& append(uint8_t const* Data, const size_t DataLen)
-  {
-    Buf_.insert(Buf_.end(), Data, Data+DataLen);
+  APDUStream &append(uint8_t const *Data, const size_t DataLen) {
+    Buf_.insert(Buf_.end(), Data, Data + DataLen);
     return *this;
   }
 
-  template <size_t N>
-  APDUStream& append(std::array<uint8_t, N> const& Data)
-  {
+  template <size_t N> APDUStream &append(std::array<uint8_t, N> const &Data) {
     return append(&Data[0], Data.size());
   }
 
-  Result exchange(LedgerAnswerBase& Out, unsigned TimeoutMS = 0);
+  Result exchange(LedgerAnswerBase &Out, unsigned TimeoutMS = 0);
 
   ~APDUStream();
 
 protected:
-  APDUStream(LedgerClient& Client, uint8_t CLA, uint8_t Ins, uint8_t P1, uint8_t P2);
+  APDUStream(LedgerClient &Client, uint8_t CLA, uint8_t Ins, uint8_t P1,
+             uint8_t P2);
 
 private:
   void wipe();
 
-  LedgerClient& Client_;
+  LedgerClient &Client_;
   std::vector<uint8_t> Buf_;
 };
 
 struct LedgerClient {
-  LedgerClient(LedgerDevice& Dev, uint8_t CLA = 0xE0):
-    Dev_(Dev), CLA_(CLA)
-  { }
-  LedgerClient(LedgerClient&&) = default;
-  LedgerClient& operator=(LedgerClient&&) = default;
+  LedgerClient(LedgerDevice &Dev, uint8_t CLA = 0xE0) : Dev_(Dev), CLA_(CLA) {}
+  LedgerClient(LedgerClient &&) = default;
+  LedgerClient &operator=(LedgerClient &&) = default;
   ~LedgerClient();
 
   APDUStream apduStream(uint8_t Ins, uint8_t P1 = 0, uint8_t P2 = 0);
-  Result rawExchange(LedgerAnswerBase& Out, uint8_t const* Data = nullptr, const size_t DataLen = 0, unsigned TimeoutMS = 0);
+  Result rawExchange(LedgerAnswerBase &Out, uint8_t const *Data = nullptr,
+                     const size_t DataLen = 0, unsigned TimeoutMS = 0);
 
-  LedgerDevice& dev() { return Dev_; }
+  LedgerDevice &dev() { return Dev_; }
 
 private:
-  LedgerDevice& Dev_;
+  LedgerDevice &Dev_;
   uint8_t CLA_;
 };
 
-} // kpl
+} // namespace kpl
 
 #endif
