@@ -1,0 +1,7 @@
+app/bin
+app/debug
+app/dep
+app/obj
+app/src/glyphs.c
+app/src/glyphs.h
+gitignore
