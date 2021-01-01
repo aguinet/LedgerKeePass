@@ -48,6 +48,8 @@ Dependencies:
 [libsodium](sodium) has been choosen for the userland cryptographic operations,
 because [KeepassXC](kpxc) already links with it (no extra dependency involved).
 
+#### Linux
+
 To build the library:
 
 ```
@@ -60,6 +62,23 @@ cmake -DCMAKE_INSTALL_PREFIX=/path/to/prefix -P cmake_install.cmake
 This will install ``libkpl`` into the prefix of your choice. This prefix will
 be useful to compile the [KeepassXC
 fork](https://github.com/aguinet/keepassxc/tree/feature/ledger).
+
+#### Windows
+
+One way to do it is to use vcpkg to gather dependencies, and CMake to build the
+project. It has been tested with Visual Studio 2019's compiler.
+
+First, [install vcpkg](https://github.com/microsoft/vcpkg#quick-start-windows).
+Then, in a Visual Studio 2019 x64 command prompt:
+
+```
+> \path\to\vcpkg\vcpkg install libsodium hidapi --triplet x64-windows
+> cd \path\to\ledger-keepass\libkpl
+> mkdir build
+> cd build
+> cmake -DCMAKE_TOOLCHAIN_FILE=/path/to/vcpkg/scripts/buildsystems/vcpkg.cmake ..
+> cmake --build . --config release
+```
 
 ### KeepassXC fork
 

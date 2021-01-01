@@ -39,7 +39,8 @@ private:
   std::vector<uint8_t> Buf_;
 };
 
-struct LedgerClient {
+class LedgerClient {
+public:
   LedgerClient(LedgerDevice &Dev, uint8_t CLA = 0xE0) : Dev_(Dev), CLA_(CLA) {}
   LedgerClient(LedgerClient &&) = default;
   LedgerClient &operator=(LedgerClient &&) = default;

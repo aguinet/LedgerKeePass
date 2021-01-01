@@ -4,6 +4,7 @@
 #include <kpl/ledger_device.h>
 
 #include <cassert>
+#include <limits>
 
 #include <sodium.h>
 
@@ -30,7 +31,11 @@ APDUStream::APDUStream(LedgerClient &Client, uint8_t CLA, uint8_t Ins,
 Result APDUStream::exchange(LedgerAnswerBase &Out, unsigned TimeoutMS) {
   assert(Buf_.size() >= APDU_HEADER_SIZE && "object already exchanged");
 
-  Buf_[APDU_LEN_IDX] = Buf_.size() - APDU_HEADER_SIZE;
+  const size_t APDULen = Buf_.size() - APDU_HEADER_SIZE;
+  if (APDULen > std::numeric_limits<uint8_t>::max()) {
+    return Result::LIB_BAD_LENGTH;
+  }
+  Buf_[APDU_LEN_IDX] = (uint8_t)APDULen;
   const auto Res = Client_.rawExchange(Out, &Buf_[0], Buf_.size(), TimeoutMS);
   wipe();
   if (Res != Result::SUCCESS) {

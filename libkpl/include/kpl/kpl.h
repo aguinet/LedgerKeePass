@@ -15,7 +15,8 @@ namespace kpl {
 class LedgerDevice;
 struct KPLWithDevice;
 
-struct KPL {
+class KPL {
+public:
   ~KPL();
   KPL(KPL const &) = delete;
   KPL(KPL &&) = default;

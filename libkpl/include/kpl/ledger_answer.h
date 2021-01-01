@@ -1,8 +1,6 @@
 #ifndef KPL_LEDGER_ANSWER_H
 #define KPL_LEDGER_ANSWER_H
 
-#include <arpa/inet.h>
-
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -34,12 +32,7 @@ public:
     return Buf_[Idx];
   }
 
-  SWTy SW() const {
-    SWTy Ret;
-    memcpy(&Ret, &Buf_[N_ - sizeof(SWTy)], sizeof(SWTy));
-    Ret = ntohs(Ret);
-    return Ret;
-  }
+  SWTy SW() const;
 
   void resize(size_t Len) {
     assert(Len <= N_);

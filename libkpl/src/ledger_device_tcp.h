@@ -1,12 +1,22 @@
 #ifndef KPL_LEDGER_DEVICE_TCP_H
 #define KPL_LEDGER_DEVICE_TCP_H
 
+#ifdef _WIN32
+#include <winsock.h> // For SOCKET
+#endif
+
 #include <kpl/ledger_device.h>
 
 #include <memory>
 #include <vector>
 
 namespace kpl {
+
+#ifdef _WIN32
+  using SockTy = SOCKET;
+#else
+  using SockTy = int;
+#endif
 
 class LedgerDeviceTCP : public LedgerDevice {
 public:
@@ -29,7 +39,7 @@ private:
   Result send(uint8_t const *Data, size_t DataLen);
   Result read(uint8_t *Out, size_t OutLen, unsigned TimeoutMS = 0);
 
-  int FD_;
+  SockTy FD_;
   std::string Host_;
   uint16_t Port_;
 };

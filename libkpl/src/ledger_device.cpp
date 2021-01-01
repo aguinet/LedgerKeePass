@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <iterator>
 #include <kpl/ledger_device.h>
 
 #include "ledger_device_tcp.h"

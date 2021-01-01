@@ -16,7 +16,9 @@ static std::vector<uint8_t> fromHex(const char *Hex) {
   for (size_t i = 0; i < Len / 2; ++i) {
     Buf[0] = tolower(Hex[2 * i]);
     Buf[1] = tolower(Hex[2 * i + 1]);
-    sscanf(Buf, "%02x", &Ret[i]);
+    uint32_t v;
+    sscanf(Buf, "%02x", &v);
+    Ret[i] = v;
   }
   return Ret;
 }

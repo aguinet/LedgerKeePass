@@ -111,7 +111,6 @@ static Result sendKeyApduAndDecrypt(LedgerClient &Client, uint8_t *Out,
                                     X25519Scalar const &OwnPrivKey,
                                     X25519Pt const &OwnPubKey,
                                     unsigned TimeoutMS) {
-  int SW;
   constexpr size_t AnsLen = sizeof(X25519Pt) + KPL_KEY_SIZE;
   LedgerAnswer<AnsLen> Ans;
   auto Res = APDU.exchange(Ans, TimeoutMS);

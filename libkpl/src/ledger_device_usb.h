@@ -3,7 +3,7 @@
 
 #include <kpl/ledger_device.h>
 
-#include <hidapi/hidapi.h>
+#include <hidapi.h>
 
 #include <memory>
 #include <vector>

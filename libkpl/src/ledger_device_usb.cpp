@@ -1,6 +1,6 @@
 #include "ledger_device_usb.h"
 #include "intmem.h"
-#include <hidapi/hidapi.h>
+#include <hidapi.h>
 
 #include <codecvt>
 #include <iomanip>
@@ -55,8 +55,7 @@ VecDevices LedgerDeviceUSB::listDevices() {
 }
 
 std::string LedgerDeviceUSB::name() const {
-  return "USB<" + Manufacturer_ + " " + Product_ + " (#" + Serial_ + ") - " +
-         Path_ + ">";
+  return "USB<" + Manufacturer_ + " " + Product_ + " (#" + Serial_ + ")>";
 }
 
 Result LedgerDeviceUSB::connect() {
@@ -99,7 +98,7 @@ Result LedgerDeviceUSB::send(uint8_t const *Data, size_t DataLen) {
   *(It++) = 0; // Seq number low
   *(It++) = 0; // Seq number high
 
-  intmem::storeu_be<uint16_t>(It, DataLen);
+  intmem::storeu_be<uint16_t>(It, static_cast<uint16_t>(DataLen));
   It += sizeof(uint16_t);
 
   uint16_t SeqNum = 1;
@@ -108,7 +107,7 @@ Result LedgerDeviceUSB::send(uint8_t const *Data, size_t DataLen) {
         std::min(DataLen, (size_t)std::distance(It, std::end(Buf)));
     It = std::copy(Data, Data + Len, It);
     const size_t PktLen = std::distance(std::begin(Buf), It);
-    if (hid_write(HIDDev_, &Buf[0], PktLen) != PktLen) {
+    if (hid_write(HIDDev_, &Buf[0], PktLen) < PktLen) {
       sodium_memzero(&Buf[0], sizeof(Buf));
       return Result::TRANSPORT_GENERIC_ERROR;
     }
