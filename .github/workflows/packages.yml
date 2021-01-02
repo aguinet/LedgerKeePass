@@ -1,0 +1,70 @@
+name: Packages
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build_win_deps:
+    strategy:
+      matrix:
+        arch:
+          - x64
+        toolset:
+          - 14.22 # VS2019
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        toolset: ${{ matrix.toolset }}
+        arch: ${{ matrix.arch }}
+    - name: vcpkg cache
+      id: cache_vcpky
+      uses: actions/cache@v2
+      with:
+        path: c:\vcpkg\installed
+        key: vcpkg-archives-${{ matrix.arch }}-windows-static-msvc${{ matrix.toolset }}
+    - name: Install dependencies
+      if: steps.cache_vcpkg.outputs.cache-hit != 'true'
+      run: |
+        c:\vcpkg\vcpkg install libsodium hidapi --triplet ${{ matrix.arch }}-windows-static
+
+  build_win:
+    needs: build_win_deps
+    strategy:
+      matrix:
+        arch:
+          - x64
+        type:
+          - debug
+          - release
+        toolset:
+          - 14.22 # VS2019
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v2
+    - uses: ilammy/msvc-dev-cmd@v1
+      with:
+        toolset: ${{ matrix.toolset }}
+        arch: ${{ matrix.arch }}
+    - name: vcpkg cache
+      uses: actions/cache@v2
+      with:
+        path: c:\vcpkg\installed
+        key: vcpkg-archives-${{ matrix.arch }}-windows-static-msvc${{ matrix.toolset }}
+    - name: Build
+      shell: cmd
+      run: |
+        cd libkpl
+        mkdir build && cd build
+        cmake -DCMAKE_INSTALL_PREFIX=c:/tmp/install .. -DCMAKE_TOOLCHAIN_FILE=c:/vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.arch}}-windows-static
+        cmake --build . --target install --config ${{ matrix.type }}
+    - uses: actions/upload-artifact@v2
+      with:
+        name: ${{ matrix.arch }}-windows-static-${{ matrix.type }}-msvc${{ matrix.toolset }}
+        path: c:/tmp/install/*
