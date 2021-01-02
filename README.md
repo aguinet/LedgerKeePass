@@ -44,11 +44,18 @@ Dependencies:
 
 * [cmake](cmake)
 * [libsodium](sodium)
+* [hidapi](https://github.com/signal11/hidapi)
 
 [libsodium](sodium) has been choosen for the userland cryptographic operations,
 because [KeepassXC](kpxc) already links with it (no extra dependency involved).
 
 #### Linux
+
+On Debian-based systems, you can install the dependencies like this:
+
+```
+$ sudo apt install libsodium-dev libhidapi-dev cmake
+```
 
 To build the library:
 
