@@ -11,6 +11,12 @@
 #include <unistd.h>
 #endif
 
+#ifdef __APPLE__
+#include <sys/errno.h>
+#else
+#include <errno.h>
+#endif
+
 #include <limits>
 #include <cassert>
 

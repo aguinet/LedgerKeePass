@@ -53,12 +53,18 @@ Dependencies:
 [libsodium](sodium) has been choosen for the userland cryptographic operations,
 because [KeepassXC](kpxc) already links with it (no extra dependency involved).
 
-#### Linux
+#### Linux/OSX
 
 On Debian-based systems, you can install the dependencies like this:
 
 ```
 $ sudo apt install libsodium-dev libhidapi-dev cmake
+```
+
+On OSX, with [MacPorts](https://www.macports.org/):
+
+```
+$ sudo port install cmake hidapi libsodium
 ```
 
 To build the library:
