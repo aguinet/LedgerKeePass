@@ -21,3 +21,8 @@ target_link_libraries(kpl_get_slots PRIVATE tools_utils)
 add_executable(kpl_list_devices
   list_devices.cpp)
 target_link_libraries(kpl_list_devices PRIVATE tools_utils)
+
+install(TARGETS
+  kpl_set kpl_get kpl_derive kpl_get_slots kpl_list_devices
+  RUNTIME
+  DESTINATION bin)
