@@ -16,6 +16,8 @@ is to have this merged in the official [KeepassXC](kpxc) application when the
 Ledger application will be considered stable (see
 [PR](https://github.com/keepassxreboot/keepassxc/pull/5842)).
 
+This application supports Ledger Nano S and X devices. Blue isn't supported.
+
 ## Screenshots
 
 The app in action, running in Speculos!
@@ -168,7 +170,6 @@ model. To test the ``nanox`` version, replace ``nanos`` by ``nanox`` in the
 
 ## TODO
 
-* port & test on Blue
 * KeepassXC GUI for key slots
 * test on actual devices!
 
