@@ -41,7 +41,7 @@ private:
 
 class LedgerClient {
 public:
-  LedgerClient(LedgerDevice &Dev, uint8_t CLA = 0xE0) : Dev_(Dev), CLA_(CLA) {}
+  LedgerClient(LedgerDevice &Dev, uint8_t CLA = 0xE0) : Dev_(&Dev), CLA_(CLA) {}
   LedgerClient(LedgerClient &&) = default;
   LedgerClient &operator=(LedgerClient &&) = default;
   ~LedgerClient();
@@ -50,10 +50,10 @@ public:
   Result rawExchange(LedgerAnswerBase &Out, uint8_t const *Data = nullptr,
                      const size_t DataLen = 0, unsigned TimeoutMS = 0);
 
-  LedgerDevice &dev() { return Dev_; }
+  LedgerDevice &dev() { return *Dev_; }
 
 private:
-  LedgerDevice &Dev_;
+  LedgerDevice *Dev_;
   uint8_t CLA_;
 };
 

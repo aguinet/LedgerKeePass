@@ -68,3 +68,26 @@ jobs:
       with:
         name: ${{ matrix.arch }}-windows-static-${{ matrix.type }}-msvc${{ matrix.toolset }}
         path: c:/tmp/install/*
+
+  build_osx:
+    strategy:
+      matrix:
+        os: [macos-10.15,] # No 10.11 for now, as GitHub runners seem to be not available (long waiting queue)
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: |
+          brew install hidapi libsodium ninja
+      - name: Build
+        run: |
+          cd libkpl
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+          ninja install
+      - uses: actions/upload-artifact@v2
+        with:
+          name: x64-${{ matrix.os }}-static
+          path: libkpl/install/*
+
