@@ -1,5 +1,7 @@
 # Keepass Ledger application
 
+![Tests](https://github.com/aguinet/ledger-keepass/workflows/Tests/badge.svg)
+
 This repository contains the code to an Ledger BOLOS application to derive
 and/or store encryption keys for Keepass databases.
 
