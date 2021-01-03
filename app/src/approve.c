@@ -54,7 +54,30 @@ static const bagl_element_t bagl_ui_approval_nanos[] = {
 static approve_callback_ty approve_cb_;
 
 static void touch_okay() {
-  approve_cb_();
+  uint8_t tx = 0;
+  BEGIN_TRY {
+    TRY {
+      approve_cb_(&tx);
+    }
+    CATCH(EXCEPTION_IO_RESET) { THROW(EXCEPTION_IO_RESET); }
+    CATCH_OTHER(e) {
+      uint16_t sw;
+      switch (e & 0xF000) {
+        case 0x6000:
+        case 0x9000:
+          sw = e;
+          break;
+        default:
+          sw = 0x6800 | (e & 0x7FF);
+          break;
+      }
+      G_io_apdu_buffer[tx++] = sw >> 8;
+      G_io_apdu_buffer[tx++] = sw & 0xFF;
+      io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
+    }
+    FINALLY{}
+  }
+  END_TRY;
   ui_idle();
 }
 
