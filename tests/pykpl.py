@@ -68,3 +68,7 @@ class PyKPL:
     @staticmethod
     def connect(port):
         return LedgerClient(device=TcpDevice("127.0.0.1:%d" % port))
+
+if __name__ == "__main__":
+    clt = LedgerClient()
+    print(PyKPL.get_key_from_name(clt, b"test").hex())
