@@ -1,4 +1,4 @@
-find_package(HIDAPI REQUIRED)
+find_package(HIDAPI REQUIRED) 
 # WARNING: cmake/Findsodium.cmake breaks something under Windows, which makes
 # FindHIDAPI.cmake to return a .dll instead of a .lib file for the hidapi library
 # file. We find sodium at the end waiting for a proper fix.

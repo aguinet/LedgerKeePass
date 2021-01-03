@@ -56,6 +56,8 @@ set(HIDAPI_ROOT_DIR
     "${HIDAPI_ROOT_DIR}"
     CACHE PATH "Root to search for HIDAPI")
 
+option(hidapi_USE_STATIC_LIBS "hidapi: link static libs" OFF)
+
 # Clean up components
 if(HIDAPI_FIND_COMPONENTS)
     if(WIN32 OR APPLE)
@@ -87,16 +89,25 @@ if(PKG_CONFIG_FOUND)
     set(CMAKE_PREFIX_PATH "${_old_prefix_path}")
 endif()
 
+set(HIDAPI_NAME hidapi)
+set(HIDAPI_USB_NAME hidapi-libusb)
+set(HIDAPI_RAW_NAME hidapi-hidraw)
+if ((UNIX OR APPLE) AND hidapi_USE_STATIC_LIBS)
+  set(HIDAPI_NAME libhidapi.a)
+  set(HIDAPI_USB_NAME libhidapi-libusb.a)
+  set(HIDAPI_RAW_NAME libhidapi-hidraw.a)
+endif()
+
 # Actually search
 find_library(
     HIDAPI_UNDECORATED_LIBRARY
-    NAMES hidapi
+    NAMES ${HIDAPI_NAME}
     PATHS "${HIDAPI_ROOT_DIR}"
     PATH_SUFFIXES lib)
 
 find_library(
     HIDAPI_LIBUSB_LIBRARY
-    NAMES hidapi hidapi-libusb
+    NAMES ${HIDAPI_NAME} ${HIDAPI_USB_NAME}
     PATHS "${HIDAPI_ROOT_DIR}"
     PATH_SUFFIXES lib
     HINTS ${PC_HIDAPI_LIBUSB_LIBRARY_DIRS})
@@ -104,7 +115,7 @@ find_library(
 if(CMAKE_SYSTEM MATCHES "Linux")
     find_library(
         HIDAPI_HIDRAW_LIBRARY
-        NAMES hidapi-hidraw
+        NAMES ${HIDAPI_RAW_NAME}
         HINTS ${PC_HIDAPI_HIDRAW_LIBRARY_DIRS})
 endif()
 
@@ -188,6 +199,62 @@ foreach(_comp IN LISTS HIDAPI_FIND_COMPONENTS)
 endforeach()
 unset(_comp)
 
+# If we have static linking and are under Linux, we need to link libusb for
+# the USB backend, and udev for both backends.
+if (hidapi_USE_STATIC_LIBS AND (UNIX AND NOT APPLE))
+  if(PKG_CONFIG_FOUND)
+    pkg_check_modules(PC_LIBUDEV libudev)
+  endif()
+  find_library(UDEV_LIBRARY
+    NAMES
+    libudev.a
+    udev
+    PATHS
+    ${PC_LIBUDEV_LIBRARY_DIRS}
+    ${PC_LIBUDEV_LIBDIR}
+    HINTS
+    "${UDEV_ROOT_DIR}"
+    )   
+  add_library(hidapi_udev STATIC IMPORTED)
+  set_target_properties(
+    hidapi_udev
+    PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C" 
+    IMPORTED_LOCATION "${UDEV_LIBRARY}")
+  list(APPEND _hidapi_component_required_vars UDEV_LIBRARY)
+  set(HIDAPI_EXTRA_LINK_LIBS hidapi_udev)
+  if(HIDAPI_LIBRARY STREQUAL ${HIDAPI_LIBUSB_LIBRARY})
+    if(PKG_CONFIG_FOUND)
+      pkg_check_modules(PC_LIBUSB1 libusb-1.0)
+    endif()
+    find_library(LIBUSB1_LIBRARY
+      NAMES
+      libusb-1.0.a
+      PATHS
+      ${PC_LIBUSB1_LIBRARY_DIRS}
+      ${PC_LIBUSB1_LIBDIR}
+      HINTS
+      "${LIBUSB1_ROOT_DIR}")
+    add_library(hidapi_libusb STATIC IMPORTED)
+    set_target_properties(
+      hidapi_libusb
+      PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C" 
+      IMPORTED_LINK_INTERFACE_LIBRARIES hidapi_udev
+      IMPORTED_LOCATION "${LIBUSB1_LIBRARY}")
+    list(APPEND _hidapi_usb_required_vars LIBUSB1_LIBRARY) 
+    list(APPEND HIDAPI_USB_LINK_LIBS hidapi_libusb)
+    list(APPEND HIDAPI_EXTRA_LINK_LIBS ${HIDAPI_USB_LINK_LIBS})
+  endif()
+endif()
+# If we have static linking and are under OSX, we need to link IOKit,
+# CoreFoundation and AppKit.
+if (hidapi_USE_STATIC_LIBS AND APPLE)
+  find_library(IOKIT_LIBRARY IOKit)
+  find_library(COREFOUNDATION_LIBRARY CoreFoundation)
+  find_library(APPKIT_LIBRARY AppKit)
+  list(APPEND _hidapi_component_required_vars IOKIT_LIBRARY COREFOUNDATION_LIBRARY APPKIT_LIBRARY)
+  list(APPEND HIDAPI_EXTRA_LINK_LIBS ${IOKIT_LIBRARY} ${COREFOUNDATION_LIBRARY} ${APPKIT_LIBRARY})
+endif()
+
 ###
 # FPHSA call
 ###
@@ -206,7 +273,7 @@ if(HIDAPI_FOUND)
             PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
                        IMPORTED_LOCATION "${HIDAPI_LIBRARY}"
                        INTERFACE_INCLUDE_DIRECTORIES "${HIDAPI_INCLUDE_DIR}"
-                       IMPORTED_LINK_INTERFACE_LIBRARIES Threads::Threads)
+                       IMPORTED_LINK_INTERFACE_LIBRARIES "Threads::Threads;${HIDAPI_EXTRA_LINK_LIBS}")
     endif()
 endif()
 
@@ -217,7 +284,7 @@ if(HIDAPI_libusb_FOUND AND NOT TARGET HIDAPI::hidapi-libusb)
         PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
                    IMPORTED_LOCATION "${HIDAPI_LIBUSB_LIBRARY}"
                    INTERFACE_INCLUDE_DIRECTORIES "${HIDAPI_INCLUDE_DIR}"
-                   IMPORTED_LINK_INTERFACE_LIBRARIES Threads::Threads)
+                   IMPORTED_LINK_INTERFACE_LIBRARIES "Threads::Threads;${HIDAPI_EXTRA_LINK_LIBS};${HIDAPI_USB_LINK_LIBS}")
 endif()
 
 if(HIDAPI_hidraw_FOUND AND NOT TARGET HIDAPI::hidapi-hidraw)
@@ -227,5 +294,5 @@ if(HIDAPI_hidraw_FOUND AND NOT TARGET HIDAPI::hidapi-hidraw)
         PROPERTIES IMPORTED_LINK_INTERFACE_LANGUAGES "C"
                    IMPORTED_LOCATION "${HIDAPI_HIDRAW_LIBRARY}"
                    INTERFACE_INCLUDE_DIRECTORIES "${HIDAPI_INCLUDE_DIR}"
-                   IMPORTED_LINK_INTERFACE_LIBRARIES Threads::Threads)
+                   IMPORTED_LINK_INTERFACE_LIBRARIES "Threads::Threads;${HIDAPI_EXTRA_LINK_LIBS}")
 endif()
