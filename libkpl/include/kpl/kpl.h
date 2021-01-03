@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <kpl/errors.h>
+#include <kpl/exports.h>
 #include <kpl/kpl_csts.h>
 #include <kpl/ledger_client.h>
 #include <kpl/version.h>
@@ -15,7 +16,7 @@ namespace kpl {
 class LedgerDevice;
 struct KPLWithDevice;
 
-class KPL {
+class KPL_API KPL {
 public:
   ~KPL();
   KPL(KPL const &) = delete;

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include <kpl/errors.h>
+#include <kpl/exports.h>
 #include <kpl/ledger_answer.h>
 
 namespace kpl {
@@ -14,7 +15,7 @@ namespace kpl {
 class LedgerClient;
 class LedgerAnswerBase;
 
-class LedgerDevice {
+class KPL_API LedgerDevice {
   friend class LedgerClient;
 
 public:

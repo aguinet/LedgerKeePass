@@ -13,7 +13,7 @@ KPL_BUILDDIR="$SRCDIR/libkpl/build_ci"
 rm -rf "$KPL_BUILDDIR"
 mkdir "$KPL_BUILDDIR"
 pushd "$KPL_BUILDDIR"
-cmake -DCMAKE_BUILD_TYPE=Debug ..
+cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON ..
 make -j$(nproc)
 popd
 

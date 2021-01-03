@@ -1,6 +1,8 @@
 #ifndef KPL_LEDGER_ANSWER_H
 #define KPL_LEDGER_ANSWER_H
 
+#include <kpl/exports.h>
+
 #include <array>
 #include <cassert>
 #include <cstdint>
@@ -10,7 +12,7 @@ namespace kpl {
 
 using SWTy = uint16_t;
 
-class LedgerAnswerBase {
+class KPL_API LedgerAnswerBase {
 public:
   uint8_t *buf_begin() { return Buf_; }
   uint8_t *buf_end() { return Buf_ + N_; }
