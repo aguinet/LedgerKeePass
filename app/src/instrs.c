@@ -34,16 +34,15 @@ static void storeKeySlot(uint8_t slot, uint8_t const *data) {
   explicit_bzero(&key, sizeof(stored_key_t));
 }
 
-static void handleStoreKeyConfirmErase() {
+static void handleStoreKeyConfirmErase(uint8_t* tx) {
   storeKeySlot(handleStoreKeyConfirmEraseArgs_.slot,
                handleStoreKeyConfirmEraseArgs_.key);
 
   explicit_bzero(&handleStoreKeyConfirmEraseArgs_,
                  sizeof(handleStoreKeyConfirmEraseArgs_));
 
-  G_io_apdu_buffer[0] = (KPL_SW_SUCCESS) >> 8;
-  G_io_apdu_buffer[1] = (KPL_SW_SUCCESS & 0xFF);
-  io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, 2);
+  *tx = 0;
+  THROW(KPL_SW_SUCCESS);
 }
 
 static void handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const *data,
@@ -79,7 +78,7 @@ static struct {
   uint8_t Slot;
 } GetKeyAfterApproveArgs_;
 
-static void handleGetKeyAfterApprove() {
+static void handleGetKeyAfterApprove(uint8_t* tx) {
   const uint8_t Slot = GetKeyAfterApproveArgs_.Slot;
   assert(Slot < KPL_SLOT_COUNT);
 
@@ -98,10 +97,8 @@ static void handleGetKeyAfterApprove() {
     THROW(INVALID_PARAMETER);
   }
 
-  uint8_t tx = X25519_PTSIZE + KPL_KEY_SIZE;
-  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS) >> 8;
-  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS & 0xFF);
-  io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
+  *tx = X25519_PTSIZE + KPL_KEY_SIZE;
+  THROW(KPL_SW_SUCCESS);
 }
 
 static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
@@ -133,7 +130,7 @@ static struct {
   uint8_t name_len;
 } GetKeyFromNameArgs_;
 
-static void handleGetKeyFromNameAfterApprove() {
+static void handleGetKeyFromNameAfterApprove(uint8_t* tx) {
   uint8_t *kpkey = &G_io_apdu_buffer[X25519_PTSIZE];
   // Inspired by
   // https://github.com/LedgerHQ/app-passwords/blob/b64b12b32e4c6bca21c208b97a42e3bd025bc926/src/password_typing.c#L46
@@ -164,10 +161,8 @@ static void handleGetKeyFromNameAfterApprove() {
     THROW(INVALID_PARAMETER);
   }
 
-  uint8_t tx = X25519_PTSIZE + KPL_KEY_SIZE;
-  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS) >> 8;
-  G_io_apdu_buffer[tx++] = (KPL_SW_SUCCESS & 0xFF);
-  io_exchange(CHANNEL_APDU | IO_RETURN_AFTER_TX, tx);
+  *tx = X25519_PTSIZE + KPL_KEY_SIZE;
+  THROW(KPL_SW_SUCCESS);
 }
 
 // All characters must be printable ASCII
