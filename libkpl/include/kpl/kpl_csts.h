@@ -15,8 +15,8 @@ extern "C" {
 // means that both Ledger apps and userland libraries will need to be updated!
 // This must be synchronized with the LEDGER_MAJOR_VERSION variable defined in
 // the app's Makefile (CCASSERT is used there to verify this at compile time).
-#define KPL_VERSION_MAJOR 1
-#define KPL_VERSION_MINOR 0
+#define KPL_VERSION_MAJOR 0
+#define KPL_VERSION_MINOR 1
 #define KPL_VERSION_PATCH 0
 #define KPL_VERSION_PROTOCOL KPL_VERSION_MAJOR
 
