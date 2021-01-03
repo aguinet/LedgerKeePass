@@ -18,7 +18,8 @@ const char *errorStr(Result Res) {
     return "unknown application error. Make sure the Keepass application is "
            "running!";
   case Result::APP_SECURITY_ERROR:
-    return "application security error (that probably prevented key derivation)";
+    return "application security error (that probably prevented key "
+           "derivation)";
   case Result::LIB_BAD_LENGTH:
     return "bad length provided in the library (internal error)";
   case Result::LIB_OUT_OF_MEMORY:

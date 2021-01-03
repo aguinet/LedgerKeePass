@@ -13,9 +13,9 @@
 namespace kpl {
 
 #ifdef _WIN32
-  using SockTy = SOCKET;
+using SockTy = SOCKET;
 #else
-  using SockTy = int;
+using SockTy = int;
 #endif
 
 class LedgerDeviceTCP : public LedgerDevice {

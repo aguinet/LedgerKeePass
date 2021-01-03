@@ -17,8 +17,8 @@
 #include <errno.h>
 #endif
 
-#include <limits>
 #include <cassert>
+#include <limits>
 
 #include "compat.h"
 #include "ledger_device_tcp.h"
@@ -28,15 +28,16 @@
 static int closesocket(int fd) { return close(fd); }
 #endif
 
-static ssize_t sock_send(kpl::SockTy fd, const void *buf, size_t count, int flags) {
+static ssize_t sock_send(kpl::SockTy fd, const void *buf, size_t count,
+                         int flags) {
 #ifdef _WIN32
-  return ::send(fd, reinterpret_cast<const char*>(buf), (int) count, flags);
+  return ::send(fd, reinterpret_cast<const char *>(buf), (int)count, flags);
 #else
   return ::send(fd, buf, count, flags);
 #endif
 }
 
-static ssize_t sock_recv(kpl::SockTy sockfd, void* buf, size_t len, int flags) {
+static ssize_t sock_recv(kpl::SockTy sockfd, void *buf, size_t len, int flags) {
 #ifdef _WIN32
   return ::recv(sockfd, reinterpret_cast<char *>(buf), (int)len, flags);
 #else
@@ -82,7 +83,7 @@ Result LedgerDeviceTCP::connect() {
     return Result::TRANSPORT_TCP_UNK_HOST;
   }
   Result Res = Result::TRANSPORT_CONNECTION_FAILED;
-  auto* cur_addr = addrs;
+  auto *cur_addr = addrs;
   while (cur_addr != nullptr) {
     SockTy sock = socket(cur_addr->ai_family, SOCK_STREAM, 0);
     if (sock < 0) {

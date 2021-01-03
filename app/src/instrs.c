@@ -1,6 +1,6 @@
+#include "instrs.h"
 #include "approve.h"
 #include "globals.h"
-#include "instrs.h"
 #include "menu.h"
 #include "os.h"
 #include "x25519.h"
@@ -33,7 +33,7 @@ static void storeKeySlot(uint8_t slot, uint8_t const *data) {
   explicit_bzero(&key, sizeof(stored_key_t));
 }
 
-static void handleStoreKeyConfirmErase(uint8_t* tx) {
+static void handleStoreKeyConfirmErase(uint8_t *tx) {
   storeKeySlot(handleStoreKeyConfirmEraseArgs_.slot,
                handleStoreKeyConfirmEraseArgs_.key);
 
@@ -62,7 +62,7 @@ static void handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const *data,
 
     os_memcpy(ApproveLine1, "Slot #X already set.", 21);
     CCASSERT(1, KPL_SLOT_COUNT < 10);
-    ApproveLine1[6] = '0'+slot;
+    ApproveLine1[6] = '0' + slot;
     os_memcpy(ApproveLine2, "Erase?", 7);
     ui_approval(handleStoreKeyConfirmErase);
     *flags |= IO_ASYNCH_REPLY;
@@ -79,7 +79,7 @@ static struct {
   uint8_t Slot;
 } GetKeyAfterApproveArgs_;
 
-static void handleGetKeyAfterApprove(uint8_t* tx) {
+static void handleGetKeyAfterApprove(uint8_t *tx) {
   const uint8_t Slot = GetKeyAfterApproveArgs_.Slot;
   assert(Slot < KPL_SLOT_COUNT);
 
@@ -117,7 +117,7 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
   os_memcpy(ApproveLine1, "Keepass open slot", 18);
   os_memcpy(ApproveLine2, "Slot #X", 8);
   CCASSERT(1, KPL_SLOT_COUNT < 10);
-  ApproveLine2[6] = '0'+slot;
+  ApproveLine2[6] = '0' + slot;
   ui_approval(handleGetKeyAfterApprove);
   *flags |= IO_ASYNCH_REPLY;
 }
@@ -133,7 +133,7 @@ static struct {
   uint8_t name_len;
 } GetKeyFromNameArgs_;
 
-static void handleGetKeyFromNameAfterApprove(uint8_t* tx) {
+static void handleGetKeyFromNameAfterApprove(uint8_t *tx) {
   uint8_t *kpkey = &G_io_apdu_buffer[X25519_PTSIZE];
   // Inspired by
   // https://github.com/LedgerHQ/app-passwords/blob/b64b12b32e4c6bca21c208b97a42e3bd025bc926/src/password_typing.c#L46
