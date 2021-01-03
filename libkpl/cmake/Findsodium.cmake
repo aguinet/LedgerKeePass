@@ -54,17 +54,19 @@ if (UNIX)
 
     if(sodium_USE_STATIC_LIBS)
         set(XPREFIX sodium_PKG_STATIC)
+        set(SODIUM_LIB_NAME libsodium.a)
     else()
         set(XPREFIX sodium_PKG)
+        set(SODIUM_LIB_NAME sodium)
     endif()
 
     find_path(sodium_INCLUDE_DIR sodium.h
         HINTS ${${XPREFIX}_INCLUDE_DIRS}
     )
-    find_library(sodium_LIBRARY_DEBUG NAMES ${${XPREFIX}_LIBRARIES} sodium
+    find_library(sodium_LIBRARY_DEBUG NAMES ${SODIUM_LIB_NAME} ${${XPREFIX}_LIBRARIES} 
         HINTS ${${XPREFIX}_LIBRARY_DIRS}
     )
-    find_library(sodium_LIBRARY_RELEASE NAMES ${${XPREFIX}_LIBRARIES} sodium
+    find_library(sodium_LIBRARY_RELEASE NAMES ${SODIUM_LIB_NAME} ${${XPREFIX}_LIBRARIES} 
         HINTS ${${XPREFIX}_LIBRARY_DIRS}
     )
 
