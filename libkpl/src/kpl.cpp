@@ -56,6 +56,8 @@ static Result parseAppSW(int SW) {
   case KPL_SW_INVALID_CLS:
   case KPL_SW_INVALID_PARAMETER:
     return Result::PROTOCOL_BAD_PARAM;
+  case KPL_SW_EXCEPTION_SECURITY:
+    return Result::APP_SECURITY_ERROR;
   case KPL_SW_UNAUTHORIZED_ACCESS:
     return Result::APP_UNAUTHORIZED_ACCESS;
   case KPL_SW_EMPTY_SLOT:
