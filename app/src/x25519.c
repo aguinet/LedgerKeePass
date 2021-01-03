@@ -22,7 +22,7 @@ static bool X25519(uint8_t *out, uint8_t const *pub_point,
   // Apply DJB's recommandation on scalar, and then change its endianess,
   // because X25519 uses little endian integers, whereas
   // cx_ecfp_scalar_mult expects big endian ones.
-  memcpy(scalar_, priv_scalar, sizeof(scalar_));
+  os_memcpy(scalar_, priv_scalar, sizeof(scalar_));
   scalar_[0] &= 0xf8u;
   scalar_[31] &= 0x7fu;
   scalar_[31] |= 0x40u;
@@ -30,7 +30,7 @@ static bool X25519(uint8_t *out, uint8_t const *pub_point,
 
   outtmp[0] = 0x02; // uncompressed point
   CCASSERT(1, X25519_SCALARSIZE == X25519_PTSIZE);
-  memcpy(&outtmp[1], pub_point, X25519_PTSIZE);
+  os_memcpy(&outtmp[1], pub_point, X25519_PTSIZE);
   // Same as above, we also need to reverse the endianess of the point.
   reverse_bytes(&outtmp[1], &outtmp[X25519_PTSIZE + 1]);
   if (cx_ecfp_scalar_mult(CX_CURVE_Curve25519, outtmp, sizeof(outtmp), scalar_,
@@ -39,7 +39,7 @@ static bool X25519(uint8_t *out, uint8_t const *pub_point,
     goto end;
   }
   reverse_bytes(&outtmp[1], &outtmp[X25519_PTSIZE + 1]);
-  memcpy(out, &outtmp[1], X25519_PTSIZE);
+  os_memcpy(out, &outtmp[1], X25519_PTSIZE);
 
 end:
   // Cleanup

@@ -26,8 +26,7 @@ static struct {
 
 static void storeKeySlot(uint8_t slot, uint8_t const *data) {
   stored_key_t key;
-  memset(&key, 0, sizeof(key));
-  memcpy(key.data, data, KPL_KEY_SIZE);
+  os_memcpy(key.data, data, KPL_KEY_SIZE);
 
   nvm_write((void *)&N_storage.keys[slot], &key, sizeof(key));
   set_key_as_valid(slot);
@@ -58,11 +57,13 @@ static void handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const *data,
 
   if (is_key_valid(slot)) {
     // We need approval of the user to erase the key.
-    memcpy(handleStoreKeyConfirmEraseArgs_.key, data, data_len);
+    os_memcpy(handleStoreKeyConfirmEraseArgs_.key, data, data_len);
     handleStoreKeyConfirmEraseArgs_.slot = slot;
 
-    snprintf(ApproveLine1, sizeof(ApproveLine1), "Slot #%d already set.", slot);
-    strncpy(ApproveLine2, "Erase?", sizeof(ApproveLine2));
+    os_memcpy(ApproveLine1, "Slot #X already set.", 21);
+    CCASSERT(1, KPL_SLOT_COUNT < 10);
+    ApproveLine1[6] = '0'+slot;
+    os_memcpy(ApproveLine2, "Erase?", 7);
     ui_approval(handleStoreKeyConfirmErase);
     *flags |= IO_ASYNCH_REPLY;
     return;
@@ -111,10 +112,12 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
     THROW(KPL_SW_EMPTY_SLOT);
   }
   GetKeyAfterApproveArgs_.Slot = slot;
-  memcpy(GetKeyAfterApproveArgs_.caller_pub, data, X25519_PTSIZE);
+  os_memcpy(GetKeyAfterApproveArgs_.caller_pub, data, X25519_PTSIZE);
 
-  strncpy(ApproveLine1, "Keepass open slot", sizeof(ApproveLine1));
-  snprintf(ApproveLine2, sizeof(ApproveLine2), "Slot #%d", slot);
+  os_memcpy(ApproveLine1, "Keepass open slot", 18);
+  os_memcpy(ApproveLine2, "Slot #X", 8);
+  CCASSERT(1, KPL_SLOT_COUNT < 10);
+  ApproveLine2[6] = '0'+slot;
   ui_approval(handleGetKeyAfterApprove);
   *flags |= IO_ASYNCH_REPLY;
 }
@@ -183,7 +186,7 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const *data,
     THROW(INVALID_PARAMETER);
   }
 
-  memcpy(GetKeyFromNameArgs_.caller_pub, data, X25519_PTSIZE);
+  os_memcpy(GetKeyFromNameArgs_.caller_pub, data, X25519_PTSIZE);
   data += X25519_PTSIZE;
   data_len -= X25519_PTSIZE;
 
@@ -192,15 +195,15 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const *data,
   }
 
   uint8_t *name = GetKeyFromNameArgs_.name;
-  memcpy(name, SEED_PREFIX, SEED_PREFIX_LEN);
-  memcpy(&name[SEED_PREFIX_LEN], data, data_len);
+  os_memcpy(name, SEED_PREFIX, SEED_PREFIX_LEN);
+  os_memcpy(&name[SEED_PREFIX_LEN], data, data_len);
   GetKeyFromNameArgs_.name_len = SEED_PREFIX_LEN + data_len;
 
   // Warning: if this string changes, the tests need to be adpated!
-  strncpy(ApproveLine1, "Keepass open name", sizeof(ApproveLine1));
+  os_memcpy(ApproveLine1, "Keepass open name", 18);
   CCASSERT(1, sizeof(ApproveLine2) >= KPL_MAX_NAME_SIZE + 3);
   ApproveLine2[0] = '\'';
-  memcpy(&ApproveLine2[1], data, data_len);
+  os_memcpy(&ApproveLine2[1], data, data_len);
   ApproveLine2[data_len + 1] = '\'';
   ApproveLine2[data_len + 2] = 0;
   ui_approval(handleGetKeyFromNameAfterApprove);

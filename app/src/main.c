@@ -239,7 +239,7 @@ void nv_app_state_init() {
     internalStorage_t storage;
     storage.key_valids = 0;
     storage.initialized = 0x01;
-    memset(storage.keys, 0, sizeof(storage.keys));
+    os_memset(storage.keys, 0, sizeof(storage.keys));
     nvm_write((internalStorage_t *)&N_storage, (void *)&storage,
               sizeof(internalStorage_t));
   }
