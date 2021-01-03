@@ -9,8 +9,12 @@ on:
 jobs:
   tests:
     runs-on: ubuntu-latest
+    container:
+      image: docker://aguinet/ledger_keepass:latest
+
     steps:
     - uses: actions/checkout@v2
     - name: Tests
       run: |
-        docker run -v $GITHUB_WORKSPACE:/pwd aguinet/ledger_keepass:latest /bin/bash /pwd/ci/docker_tests.sh /pwd
+        # Python dependencies have been installed in the root home directory
+        HOME=/root ci/docker_tests.sh $GITHUB_WORKSPACE
