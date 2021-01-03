@@ -91,3 +91,24 @@ jobs:
           name: x64-${{ matrix.os }}-static
           path: libkpl/install/*
 
+  build_linux:
+    runs-on: ubuntu-latest
+    container:
+      image: docker://ubuntu:16.04
+
+    steps:
+      - name: Install dependencies
+        run: |
+          apt-get update && apt-get install --no-install-recommends -yq \
+            libsodium-dev libhidapi-dev build-essential g++ cmake git ninja-build
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          cd libkpl
+          mkdir build && cd build
+          cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install -DCMAKE_BUILD_TYPE=Release -G Ninja .. -Dsodium_USE_STATIC_LIBS=ON
+          ninja install
+      - uses: actions/upload-artifact@v2
+        with:
+          name: x64-ubuntu16.04-static
+          path: libkpl/install/*
