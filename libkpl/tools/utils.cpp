@@ -5,6 +5,7 @@
 
 #include <cstdio>
 
+KPLDev::KPLDev(KPLDev&&) = default;
 KPLDev::~KPLDev() = default;
 
 KPLDev getFirstDeviceKPL() {

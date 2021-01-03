@@ -10,7 +10,7 @@ class KPL;
 
 struct KPLDev {
   KPLDev() = default;
-  KPLDev(KPLDev &&) = default;
+  KPLDev(KPLDev &&); 
   KPLDev &operator=(KPLDev &&) = default;
   ~KPLDev();
 
