@@ -2,6 +2,7 @@
 #define KPL_VERSION_H
 
 #include <cstdint>
+#include <kpl/exports.h>
 
 namespace kpl {
 
@@ -17,7 +18,7 @@ struct Version {
 
   uint8_t protocol() const { return Major_; }
 
-  static Version lib();
+  KPL_API static Version lib();
 
 private:
   uint8_t Major_;

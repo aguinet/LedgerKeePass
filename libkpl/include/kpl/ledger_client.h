@@ -5,6 +5,7 @@
 #include <vector>
 
 #include <kpl/errors.h>
+#include <kpl/exports.h>
 
 namespace kpl {
 
@@ -12,7 +13,7 @@ class LedgerDevice;
 class LedgerClient;
 class LedgerAnswerBase;
 
-struct APDUStream {
+struct KPL_API APDUStream {
   friend class LedgerClient;
 
   APDUStream &append(uint8_t const *Data, const size_t DataLen) {
@@ -39,7 +40,7 @@ private:
   std::vector<uint8_t> Buf_;
 };
 
-class LedgerClient {
+class KPL_API LedgerClient {
 public:
   LedgerClient(LedgerDevice &Dev, uint8_t CLA = 0xE0) : Dev_(&Dev), CLA_(CLA) {}
   LedgerClient(LedgerClient &&) = default;

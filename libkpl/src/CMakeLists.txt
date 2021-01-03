@@ -15,11 +15,20 @@ add_library(kpl
   version.cpp
 )
 
+if (NOT BUILD_SHARED_LIBS)
+  target_compile_definitions(kpl PUBLIC kpl_STATIC)
+endif()
+
 target_link_libraries(kpl PRIVATE sodium HIDAPI::hidapi)
 if (WIN32)
   target_compile_definitions(kpl PRIVATE _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING)
   target_link_libraries(kpl PRIVATE ws2_32)
 endif()
+set_target_properties(kpl PROPERTIES
+  C_VISIBILITY_PRESET hidden
+  CXX_VISIBILITY_PRESET hidden
+  VISIBILITY_INLINES_HIDDEN ON
+)
 
 target_include_directories(kpl PUBLIC
   $<INSTALL_INTERFACE:include>

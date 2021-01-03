@@ -1,6 +1,8 @@
 #ifndef KPL_ERRORS_H
 #define KPL_ERRORS_H
 
+#include <kpl/exports.h>
+
 #include <cassert>
 #include <utility>
 
@@ -29,7 +31,7 @@ enum Result : int {
   TRANSPORT_GENERIC_ERROR = -46,
 };
 
-const char *errorStr(Result Res);
+KPL_API const char *errorStr(Result Res);
 
 struct ErrorTag {};
 
