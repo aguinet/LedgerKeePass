@@ -114,7 +114,8 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
   GetKeyAfterApproveArgs_.Slot = slot;
   os_memcpy(GetKeyAfterApproveArgs_.caller_pub, data, X25519_PTSIZE);
 
-  os_memcpy(ApproveLine1, "Keepass open slot", 18);
+  // Warning: if this string changes, the tests need to be adpated!
+  os_memcpy(ApproveLine1, "Database open slot", 19);
   os_memcpy(ApproveLine2, "Slot #X", 8);
   CCASSERT(1, KPL_SLOT_COUNT < 10);
   ApproveLine2[6] = '0' + slot;
@@ -200,7 +201,7 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const *data,
   GetKeyFromNameArgs_.name_len = SEED_PREFIX_LEN + data_len;
 
   // Warning: if this string changes, the tests need to be adpated!
-  os_memcpy(ApproveLine1, "Keepass open name", 18);
+  os_memcpy(ApproveLine1, "Database open name", 19);
   CCASSERT(1, sizeof(ApproveLine2) >= KPL_MAX_NAME_SIZE + 3);
   ApproveLine2[0] = '\'';
   os_memcpy(&ApproveLine2[1], data, data_len);
