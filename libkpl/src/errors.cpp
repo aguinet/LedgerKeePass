@@ -15,7 +15,7 @@ const char *errorStr(Result Res) {
   case Result::APP_EMPTY_SLOT:
     return "no key exist in slot";
   case Result::APP_UNKNOWN_ERROR:
-    return "unknown application error. Make sure the Keepass application is "
+    return "unknown application error. Make sure the LedgerKeePass application is "
            "running!";
   case Result::APP_SECURITY_ERROR:
     return "application security error (that probably prevented key "

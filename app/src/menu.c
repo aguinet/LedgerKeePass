@@ -6,7 +6,7 @@
 UX_STEP_NOCB(ux_idle_flow_1_step, pnn,
              {
                  &C_logo,
-                 "Keepass",
+                 "LedgerKeePass",
                  "app",
              });
 UX_STEP_NOCB(ux_idle_flow_2_step, bn, {"Version", APPVERSION});

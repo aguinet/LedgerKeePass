@@ -3,8 +3,8 @@ import random
 
 from run_speculos import RunSpeculos, UnsupportedSpeculos
 
-TXT_KEEPASS_OPEN_NAME = "Keepass open name"
-TXT_KEEPASS_OPEN_SLOT = "Keepass open slot"
+TXT_KEEPASS_OPEN_NAME = "Database open name"
+TXT_KEEPASS_OPEN_SLOT = "Database open slot"
 TXT_ERASE = "Erase?"
 SLOT_COUNT = 8
 
