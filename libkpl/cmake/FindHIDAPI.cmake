@@ -245,6 +245,13 @@ if (hidapi_USE_STATIC_LIBS AND (UNIX AND NOT APPLE))
     list(APPEND HIDAPI_EXTRA_LINK_LIBS ${HIDAPI_USB_LINK_LIBS})
   endif()
 endif()
+
+# If we have static linking and are under Windows, we need to link with
+# setupapi.
+if (hidapi_USE_STATIC_LIBS AND WIN32)
+  list(APPEND HIDAPI_EXTRA_LINK_LIBS Setupapi)
+endif()
+
 # If we have static linking and are under OSX, we need to link IOKit,
 # CoreFoundation and AppKit.
 if (hidapi_USE_STATIC_LIBS AND APPLE)
