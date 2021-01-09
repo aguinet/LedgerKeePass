@@ -65,17 +65,17 @@ jobs:
       with:
         toolset: ${{ matrix.toolset }}
         arch: ${{ matrix.arch }}
-    - name: Build
+    - name: Build KPL
       shell: cmd
       run: |
         cd libkpl
         mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=c:/tmp/install .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.arch}}-windows-static -DCMAKE_BUILD_TYPE=${{ matrix.type }} -Dhidapi_USE_STATIC_LIBS=ON -Dsodium_USE_STATIC_LIBS=ON
+        cmake -DCMAKE_INSTALL_PREFIX=c:/libkpl .. -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake -DVCPKG_TARGET_TRIPLET=${{ matrix.arch}}-windows-static -DCMAKE_BUILD_TYPE=${{ matrix.type }} -Dhidapi_USE_STATIC_LIBS=ON -Dsodium_USE_STATIC_LIBS=ON
         cmake --build . --target install --config ${{ matrix.type }}
     - uses: actions/upload-artifact@v2
       with:
         name: kpl-${{ matrix.arch }}-windows-static-${{ matrix.type }}-msvc${{ matrix.toolset }}
-        path: c:/tmp/install/*
+        path: c:/libkpl/*
 
   build_osx:
     strategy:
@@ -105,18 +105,103 @@ jobs:
       image: docker://ubuntu:16.04
 
     steps:
-      - name: Install dependencies
-        run: |
-          apt-get update && apt-get install --no-install-recommends -yq \
-            libsodium-dev libhidapi-dev build-essential g++ cmake git ninja-build
-      - uses: actions/checkout@v2
-      - name: Build
-        run: |
-          cd libkpl
-          mkdir build && cd build
-          cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install -DCMAKE_BUILD_TYPE=Release -G Ninja .. -Dsodium_USE_STATIC_LIBS=ON
-          ninja install
-      - uses: actions/upload-artifact@v2
-        with:
-          name: kpl-x64-ubuntu16.04-static
-          path: libkpl/install/*
+    - name: Install APT dependencies
+      run: |
+        apt-get update && apt-get install --no-install-recommends -yq \
+          libhidapi-dev build-essential g++ cmake git ninja-build wget ca-certificates
+    - name: Cache built dependencies
+      id: cache_deps
+      uses: actions/cache@v2
+      with:
+        path: /usr/local
+        key: deps_linux
+    - name: Build static libsodium
+      if: steps.cache_deps.outputs.cache-hit != 'true'
+      run: |
+        wget https://github.com/jedisct1/libsodium/releases/download/1.0.18-RELEASE/libsodium-1.0.18.tar.gz
+        tar xf libsodium*.tar.gz && rm libsodium*.tar.gz && cd libsodium*
+        ./configure CFLAGS="-ffunction-sections -fdata-sections -DSODIUM_STATIC -fPIC" --enable-static=yes --enable-shared=no --prefix=/usr/local
+        make -j$(nproc) install
+    - uses: actions/checkout@v2
+    - name: Build
+      run: |
+        cd libkpl
+        mkdir build && cd build
+        cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-gc-sections" -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        ninja install
+    - uses: actions/upload-artifact@v2
+      with:
+        name: kpl-x64-ubuntu16.04
+        path: libkpl/install/*
+
+  build_kp2_plugin:
+    runs-on: windows-2019
+
+    steps:
+    - name: kp2 cache
+      id: cache_kp2
+      uses: actions/cache@v2
+      with:
+        path: c:\kp2
+        key: kp2
+    - name: Download & extract KeePass2
+      if: steps.cache_kp2.outputs.cache-hit != 'true'
+      run: |
+        mkdir c:\kp2 && cd c:\kp2
+        Invoke-WebRequest -Uri "https://netcologne.dl.sourceforge.net/project/keepass/KeePass%202.x/2.47/KeePass-2.47.zip" -OutFile "keepass2.zip"
+        7z x keepass2.zip
+        rm keepass2.zip
+    - uses: actions/checkout@v2
+    - uses: microsoft/setup-msbuild@v1.0.2
+    - name: Build KeePass2 plugin
+      shell: cmd
+      run: |
+        cd kp2
+        msbuild -t:restore
+        msbuild -p:Configuration=Release -p:KP2Path=c:\\kp2\\keepass.exe
+        cd ..
+        mkdir c:\kp2-plugin
+        cp kp2\LedgerKeePass\bin\Release\net4.0\LedgerKeePass.dll c:\kp2-plugin
+    - uses: actions/upload-artifact@v2
+      with:
+        name: KeePass2-plugin-only
+        path: c:\kp2-plugin
+
+  package_kp2:
+    strategy:
+      matrix:
+        include:
+        - kpl: kpl-x64-windows-static-release-msvc14.22
+          libname: kpl_c.dll
+          archname: x64-windows
+        - kpl: kpl-x64-ubuntu16.04
+          libname: libkpl_c.so
+          archname: x64-ubuntu16.04
+
+    needs:
+      - build_linux
+      - build_win
+      - build_kp2_plugin
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Download KPL release build
+      uses: actions/download-artifact@v2
+      with:
+        name: ${{ matrix.kpl }}
+        path: kpl_install
+    - name: Download KeePass2 plugin
+      uses: actions/download-artifact@v2
+      with:
+        name: KeePass2-plugin-only
+        path: kp2-plugin
+    - name: Create package
+      run: |
+        mkdir /opt/kp2-plugin
+        cp kp2-plugin/LedgerKeePass.dll kpl_install/lib/${{ matrix.libname }} /opt/kp2-plugin
+        # TODO: README to install
+    - uses: actions/upload-artifact@v2
+      with:
+        name: KeePass2-plugin-${{ matrix.archname }}
+        path: /opt/kp2-plugin

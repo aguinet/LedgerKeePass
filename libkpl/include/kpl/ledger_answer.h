@@ -56,7 +56,7 @@ template <size_t N> class LedgerAnswer : public LedgerAnswerBase {
   static constexpr size_t LenWithSW = N + sizeof(SWTy);
 
 public:
-  LedgerAnswer() : LedgerAnswerBase(LenWithSW, &Buf_[0]) {}
+  LedgerAnswer() : LedgerAnswerBase(LenWithSW, &*std::begin(Buf_)) {}
 
 private:
   std::array<uint8_t, LenWithSW> Buf_;
