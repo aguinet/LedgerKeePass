@@ -28,6 +28,7 @@ set_target_properties(kpl PROPERTIES
   C_VISIBILITY_PRESET hidden
   CXX_VISIBILITY_PRESET hidden
   VISIBILITY_INLINES_HIDDEN ON
+  POSITION_INDEPENDENT_CODE ON
 )
 
 target_include_directories(kpl PUBLIC
@@ -43,3 +44,7 @@ install(TARGETS kpl
 install(EXPORT kpl-target
   DESTINATION lib/cmake
 )
+
+if (KPL_BUILD_C_API)
+  add_subdirectory(c_api)
+endif()

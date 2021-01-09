@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net4.0</TargetFramework>
+    <Product>KeePass Plugin</Product>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Windows'))">
+    <DefineConstants>OS_WIN</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('Linux'))">
+    <DefineConstants>OS_UNIX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([MSBuild]::IsOSPlatform('OSX'))">
+    <DefineConstants>OS_OSX</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <KP2Path>/usr/lib/keepass2/KeePass.exe</KP2Path>
+    <Authors>Adrien Guinet</Authors>
+    <Version>0.2.0</Version>
+    <Company />
+    <PackageProjectUrl>https://github.com/aguinet/LedgerKeePass</PackageProjectUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="KeePass, Version=2.1.7.25493, Culture=neutral, PublicKeyToken=7952fc8ece49a093, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>$(KP2Path)</HintPath>
+    </Reference>
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+
+</Project>
