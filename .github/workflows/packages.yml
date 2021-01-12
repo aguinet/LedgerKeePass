@@ -127,7 +127,7 @@ jobs:
       run: |
         cd libkpl
         mkdir build && cd build
-        cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-gc-sections" -DCMAKE_BUILD_TYPE=Release -G Ninja ..
+        cmake -DCMAKE_INSTALL_PREFIX=$PWD/../install -DCMAKE_SHARED_LINKER_FLAGS="-Wl,-gc-sections -Wl,-strip-all" -DCMAKE_BUILD_TYPE=Release -G Ninja ..
         ninja install
     - uses: actions/upload-artifact@v2
       with:
