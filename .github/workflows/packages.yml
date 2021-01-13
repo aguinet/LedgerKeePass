@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - main
+    tags:
+      - "*.*.*"
   pull_request:
 
 jobs:
@@ -205,3 +207,85 @@ jobs:
       with:
         name: KeePass2-plugin-${{ matrix.archname }}
         path: /opt/kp2-plugin
+
+  release_upload:
+    if: ${{ startsWith(github.ref, 'refs/tags/') }}
+
+    needs:
+      - package_kp2
+      - build_linux
+      - build_win
+      - build_osx
+
+    runs-on: ubuntu-20.04
+
+    steps:
+    - name: Download artifacts
+      uses: actions/download-artifact@v2
+
+    - name: Zip artifacts
+      run: |
+        ls
+        for a in kpl-x64-windows-static-release-msvc14.22 kpl-x64-ubuntu16.04 kpl-x64-macos-10.15-static; do zip -r $a.zip $a; done
+        for a in KeePass2-plugin-x64-windows KeePass2-plugin-x64-ubuntu16.04; do pushd $a; zip -r ../$a.zip *; popd; done
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: LedgerKeePass ${{ github.ref }}
+        draft: true
+        prerelease: false
+
+    - name: Upload kpl-x86-windows-static-release-msvc14.22
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: kpl-x64-windows-static-release-msvc14.22.zip
+        asset_name: kpl-x64-windows-static-release-msvc14.22.zip
+        asset_content_type: application/zip
+
+    - name: Upload kpl-x64-ubuntu16.04
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: kpl-x64-ubuntu16.04.zip
+        asset_name: kpl-x64-ubuntu16.04.zip
+        asset_content_type: application/zip
+
+    - name: Upload kpl-x64-macos-10.15-static
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: kpl-x64-macos-10.15-static.zip
+        asset_name: kpl-x64-macos-10.15-static.zip
+        asset_content_type: application/zip
+
+    - name: Upload KeePass2-plugin-x64-windows
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: KeePass2-plugin-x64-windows.zip
+        asset_name: KeePass2-plugin-x64-windows.zip
+        asset_content_type: application/zip
+
+    - name: Upload KeePass2-plugin-x64-ubuntu16.04
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: KeePass2-plugin-x64-ubuntu16.04.zip
+        asset_name: KeePass2-plugin-x64-ubuntu16.04.zip
+        asset_content_type: application/zip
