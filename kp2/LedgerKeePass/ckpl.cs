@@ -12,6 +12,7 @@ namespace LedgerKeePass
     public const int SlotCount = 8;
     public const int ResultSuccess = 0;
     public const int KeySize = 32;
+    public const int MaxNameSize = 5;
 #if OS_UNIX
     public const string KPLDllName = "libkpl_c.so";
 #elif OS_WIN
