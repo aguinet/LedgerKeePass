@@ -105,6 +105,7 @@ namespace LedgerKeePass
     {
       this.KPLObj = K;
       InitializeComponent();
+      this.flowLayoutPanel1.Left = (this.ClientSize.Width - this.flowLayoutPanel1.Width) / 2 + 50;
 
       this.AcceptButton = this.btnOpen;
       this.btnOpen.Click += new System.EventHandler(this.openKey);
@@ -124,6 +125,7 @@ namespace LedgerKeePass
         this.comboSlot.SelectedIndex = 0;
       }
       this.comboType.SelectedIndex = 0;
+      this.ActiveControl = this.textDbName;
     }
 
     private void openKey(object sender, EventArgs e) {
@@ -178,10 +180,12 @@ namespace LedgerKeePass
       if (this.comboType.SelectedIndex == 0) {
         this.comboSlot.Visible  = false;
         this.textDbName.Visible = true;
+        this.labelStatus.Text = "Please enter the database name.";
       }
       else {
         this.comboSlot.Visible  = true;
         this.textDbName.Visible = false;
+        this.labelStatus.Text = "Please choose the database slot.";
       }
     }
 
@@ -227,9 +231,7 @@ namespace LedgerKeePass
       this.flowLayoutPanel1.Controls.Add(this.comboType);
       this.flowLayoutPanel1.Controls.Add(this.comboSlot);
       this.flowLayoutPanel1.Controls.Add(this.textDbName);
-      this.flowLayoutPanel1.Location = new System.Drawing.Point(42, 3);
       this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-      this.flowLayoutPanel1.Size = new System.Drawing.Size(439, 34);
       this.flowLayoutPanel1.TabIndex = 0;
       //
       // lblKey
@@ -249,6 +251,7 @@ namespace LedgerKeePass
       this.comboType.Location = new System.Drawing.Point(82, 3);
       this.comboType.Name = "comboType";
       this.comboType.Size = new System.Drawing.Size(121, 28);
+      this.comboType.DropDownStyle = ComboBoxStyle.DropDownList;
       this.comboType.TabIndex = 0;
       //
       // comboSlot
@@ -306,7 +309,7 @@ namespace LedgerKeePass
       this.AcceptButton = this.btnOpen;
       this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
       this.AutoScaleMode = AutoScaleMode.Font;
-      this.ClientSize = new System.Drawing.Size(523, 159);
+      this.ClientSize = new System.Drawing.Size(520, 160);
       this.Controls.Add(this.labelStatus);
       this.Controls.Add(this.btnCancel);
       this.Controls.Add(this.btnOpen);
@@ -316,6 +319,7 @@ namespace LedgerKeePass
       this.MinimizeBox = false;
       this.Name = "KeyForm";
       this.Text = "Ledger device";
+
       this.flowLayoutPanel1.ResumeLayout(false);
       this.flowLayoutPanel1.PerformLayout();
       this.ResumeLayout(false);
