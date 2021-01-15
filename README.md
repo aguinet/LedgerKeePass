@@ -16,6 +16,8 @@ is to have this merged in the official [KeePassXC](kpxc) application when the
 Ledger application will be considered stable (see
 [PR](https://github.com/keepassxreboot/keepassxc/pull/5842)).
 
+We also provide a [KeePass2](https://keepass.info/) plugin (see below).
+
 This application supports Ledger Nano S and X devices. Blue isn't supported.
 
 ## Screenshots
