@@ -22,15 +22,41 @@ This application supports Ledger Nano S and X devices. Blue isn't supported.
 
 The app in action, running in Speculos!
 
+### KeePassXC
+
 While opening a database:
 
-![KeepassXC database open](imgs/kp_ledger_open.png)
+![KeePassXC database open](imgs/kp_ledger_open.png)
 
 Database creation:
 
-![KeepassXC database create](imgs/kp_ledger_create.png)
+![KeePassXC database create](imgs/kp_ledger_create.png)
+
+### KeePass2 plugin
+
+![KeePass2 plugin](imgs/kp2_plugin.png)
+
 
 ## Build & install
+
+### KeePass2 plugin
+
+You can use pre-built packages for
+[Windows](https://github.com/aguinet/LedgerKeePass/releases/download/0.2.0/KeePass2.47-plugin-x64-windows.zip)
+&
+[Linux](https://github.com/aguinet/LedgerKeePass/releases/download/0.2.0/KeePass2.47-plugin-x64-ubuntu16.04.zip)
+x64.
+
+To install the plugin, extract the content of ths archives directly into `/path/to/KeePass2/Plugins`. For instance:
+
+* on Linux, it can be in `/usr/lib/keepass2/Plugins`
+* on Windows, default installation is in `C:\Program Files (x86)\KeePass Password Safe 2\Plugins`
+
+On Linux, `libhidapi-libusb0` is needed. On Debian-like system, you can install it with:
+
+```
+sudo apt install libhidapi-libusb0
+```
 
 ### Ledger application
 
