@@ -160,7 +160,7 @@ The app is capable of provide keys to [KeePassXC](kpxc) in two ways:
 
 User interaction is needed before a key is sent to the KeePassXC application.
 
-The KeePassXC GUI can't yet store user-provided keys. The ``set`` tool compiled
+The KeePassXC GUI can't yet store user-provided keys. The ``kpl_set`` tool compiled
 alongside the ``kpl`` library can do this.
 
 ## Run with the Speculos emulator
