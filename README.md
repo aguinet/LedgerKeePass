@@ -151,7 +151,7 @@ $ cmake -DWITH_XC_LEDGER=ON -Dkpl_DIR=/path/to/kpl_prefix/lib/cmake [other param
 
 ## Usage
 
-The app is capable of provide keys to [KeePassXC][kpxc] / [KeePass2][kp2] in two ways:
+The app is capable of providing keys to [KeePassXC][kpxc] / [KeePass2][kp2] in two ways:
 
 * by deriving a 32 bytes key using the device's seed and a user provided string
   (e.g. `perso`)
