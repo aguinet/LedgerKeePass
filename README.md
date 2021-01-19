@@ -10,11 +10,11 @@ and/or store encryption keys for KeePass databases.
 The userland part has been implemented in a [fork of
 KeePassXC](https://github.com/aguinet/keepassxc/tree/feature/ledger). It uses
 the provided ``libkpl`` library, to talk with the Ledger application.  The goal
-is to have this merged in the official [KeePassXC](kpxc) application when the
+is to have this merged in the official [KeePassXC][kpxc] application when the
 Ledger application will be considered stable (see
 [PR](https://github.com/keepassxreboot/keepassxc/pull/5842)).
 
-We also provide a [KeePass2](https://keepass.info/) plugin (see below).
+We also provide a [KeePass2][kp2] plugin (see below).
 
 This application supports Ledger Nano S and X devices. Blue isn't supported.
 
@@ -87,12 +87,12 @@ binaries will be in the ``app/bin`` directory.
 
 Dependencies:
 
-* [cmake](cmake)
-* [libsodium](sodium)
+* [cmake](https://cmake.org/)
+* [libsodium][sodium]
 * [hidapi](https://github.com/signal11/hidapi)
 
-[libsodium](sodium) has been choosen for the userland cryptographic operations,
-because [KeePassXC](kpxc) already links with it (no extra dependency involved).
+[libsodium][sodium] has been choosen for the userland cryptographic operations,
+because [KeePassXC][kpxc] already links with it (no extra dependency involved).
 
 #### Linux/OSX
 
@@ -151,7 +151,7 @@ $ cmake -DWITH_XC_LEDGER=ON -Dkpl_DIR=/path/to/kpl_prefix/lib/cmake [other param
 
 ## Usage
 
-The app is capable of provide keys to [KeePassXC](kpxc) in two ways:
+The app is capable of provide keys to [KeePassXC][kpxc] / [KeePass2][kp2] in two ways:
 
 * by deriving a 32 bytes key using the device's seed and a user provided string
   (e.g. `perso`)
@@ -167,25 +167,22 @@ alongside the ``kpl`` library can do this.
 
 [Build and
 install](https://github.com/LedgerHQ/speculos/blob/master/doc/build.md) the
-[Speculos](speculos) emulator. You need to use [this
-branch](https://github.com/aguinet/speculos/tree/feature/curve25519), waiting
-for the [associated PR](https://github.com/LedgerHQ/speculos/pull/116) to be
-review and merged.
+[Speculos][speculos] emulator. 
 
-Once the Ledger application is compiled, you can run it with Speculos:
+Once the Ledger application is compiled, you can run it with [Speculos][speculos]:
 
 ```
 /path/to/speculos.py app/bin/app.elf -k 1.6
 ```
 
-You can the emulated application with [KeePassXC](kpxc) by setting these environment variables:
+You can the emulated application with [KeePassXC][kpxc] / [KeePass2][kp2] by setting these environment variables:
 
 ```
 export LEDGER_PROXY_ADDRESS=127.0.0.1
 export LEDGER_PROXY_PORT=9999
 ```
 
-(By default, [Speculos](speculos) listens on TCP port 9999).
+(By default, Speculos listens on TCP port 9999).
 
 ## Protocol
 
@@ -224,3 +221,4 @@ model. To test the ``nanox`` version, replace ``nanos`` by ``nanox`` in the
 [speculos]: https://github.com/LedgerHQ/speculos/
 [kpxc]: https://github.com/keepassxreboot/keepassxc/
 [sodium]: https://github.com/jedisct1/libsodium
+[kp2]: https://keepass.info/
