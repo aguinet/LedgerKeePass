@@ -5,9 +5,7 @@
 This repository contains the code to an Ledger BOLOS application to derive
 and/or store encryption keys for KeePass databases.
 
-**WARNING: this application and all the code using it are still in development
-(see TODO). Please do not use this in production yet. Databases could be lost
-or corrupted, and/or secrets leaked. You have been warned.**
+**WARNING: Please do not use this in production yet. See the Status section below.**
 
 The userland part has been implemented in a [fork of
 KeePassXC](https://github.com/aguinet/keepassxc/tree/feature/ledger). It uses
@@ -19,6 +17,21 @@ Ledger application will be considered stable (see
 We also provide a [KeePass2](https://keepass.info/) plugin (see below).
 
 This application supports Ledger Nano S and X devices. Blue isn't supported.
+
+## Status
+
+**WARNING: Please do not use this in production yet. Databases could be lost
+or corrupted, and/or secrets leaked. You have been warned.** This section explains why.
+
+The 0.2.0 version of the Ledger application has been submitted to Ledger for
+[approval](https://ledger.readthedocs.io/en/latest/additional/publishing_an_app.html).
+This review might involve some changes that could imply the way keys are
+derived from database names. If such changes need to occur, that would mean
+that databases previously encrypted could be lost.
+
+We are thus waiting for this review to release the final 1.0.0 that would be
+considered stable and production ready. In the meantime, use this at your own
+risk.
 
 ## Screenshots
 
