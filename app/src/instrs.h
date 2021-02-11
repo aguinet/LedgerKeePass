@@ -12,7 +12,7 @@ enum AppInstrs {
   INS_LAST
 };
 
-typedef void (*handleInstrFunTy)(
+typedef uint16_t (*handleInstrFunTy)(
     // p1,p2,data,datalen
     uint8_t, uint8_t, uint8_t const *, uint8_t,
     // flags,tx

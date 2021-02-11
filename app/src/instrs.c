@@ -8,15 +8,15 @@
 #include <kpl/app_errors.h>
 #include <kpl/kpl_csts.h>
 
-static void handleGetAppConfiguration(uint8_t slot, uint8_t p2,
-                                      uint8_t const *data, uint8_t data_len,
-                                      volatile unsigned int *flags,
-                                      volatile unsigned int *tx) {
+static uint16_t handleGetAppConfiguration(uint8_t slot, uint8_t p2,
+                                          uint8_t const *data, uint8_t data_len,
+                                          volatile unsigned int *flags,
+                                          volatile unsigned int *tx) {
   G_io_apdu_buffer[0] = LEDGER_MAJOR_VERSION;
   G_io_apdu_buffer[1] = LEDGER_MINOR_VERSION;
   G_io_apdu_buffer[2] = LEDGER_PATCH_VERSION;
   *tx = 3;
-  THROW(KPL_SW_SUCCESS);
+  return KPL_SW_SUCCESS;
 }
 
 static struct {
@@ -33,7 +33,7 @@ static void storeKeySlot(uint8_t slot, uint8_t const *data) {
   explicit_bzero(&key, sizeof(stored_key_t));
 }
 
-static void handleStoreKeyConfirmErase(uint8_t *tx) {
+static uint16_t handleStoreKeyConfirmErase(uint8_t *tx) {
   storeKeySlot(handleStoreKeyConfirmEraseArgs_.slot,
                handleStoreKeyConfirmEraseArgs_.key);
 
@@ -41,18 +41,18 @@ static void handleStoreKeyConfirmErase(uint8_t *tx) {
                  sizeof(handleStoreKeyConfirmEraseArgs_));
 
   *tx = 0;
-  THROW(KPL_SW_SUCCESS);
+  return KPL_SW_SUCCESS;
 }
 
-static void handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const *data,
-                           uint8_t data_len, volatile unsigned int *flags,
-                           volatile unsigned int *tx) {
+static uint16_t handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const *data,
+                               uint8_t data_len, volatile unsigned int *flags,
+                               volatile unsigned int *tx) {
   if (slot >= KPL_SLOT_COUNT) {
-    THROW(INVALID_PARAMETER);
+    return INVALID_PARAMETER;
   }
 
   if (data_len != KPL_KEY_SIZE) {
-    THROW(INVALID_PARAMETER);
+    return INVALID_PARAMETER;
   }
 
   if (is_key_valid(slot)) {
@@ -66,12 +66,12 @@ static void handleStoreKey(uint8_t slot, uint8_t p2, uint8_t const *data,
     os_memcpy(ApproveLine2, "Erase?", 7);
     ui_approval(handleStoreKeyConfirmErase);
     *flags |= IO_ASYNCH_REPLY;
-    return;
+    return KPL_SW_SUCCESS;
   }
 
   storeKeySlot(slot, data);
   *tx = 0;
-  THROW(KPL_SW_SUCCESS);
+  return KPL_SW_SUCCESS;
 }
 
 static struct {
@@ -79,7 +79,7 @@ static struct {
   uint8_t Slot;
 } GetKeyAfterApproveArgs_;
 
-static void handleGetKeyAfterApprove(uint8_t *tx) {
+static uint16_t handleGetKeyAfterApprove(uint8_t *tx) {
   const uint8_t Slot = GetKeyAfterApproveArgs_.Slot;
   assert(Slot < KPL_SLOT_COUNT);
 
@@ -95,21 +95,21 @@ static void handleGetKeyAfterApprove(uint8_t *tx) {
   if (!X25519EncryptKPKey(kpkey, own_pubkey,
                           GetKeyAfterApproveArgs_.caller_pub)) {
     ui_idle();
-    THROW(INVALID_PARAMETER);
+    return INVALID_PARAMETER;
   }
 
   *tx = X25519_PTSIZE + KPL_KEY_SIZE;
-  THROW(KPL_SW_SUCCESS);
+  return KPL_SW_SUCCESS;
 }
 
-static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
-                         uint8_t data_len, volatile unsigned int *flags,
-                         volatile unsigned int *tx) {
+static uint16_t handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
+                             uint8_t data_len, volatile unsigned int *flags,
+                             volatile unsigned int *tx) {
   if (slot >= KPL_SLOT_COUNT || data_len != X25519_PTSIZE) {
-    THROW(INVALID_PARAMETER);
+    return INVALID_PARAMETER;
   }
   if (!is_key_valid(slot)) {
-    THROW(KPL_SW_EMPTY_SLOT);
+    return KPL_SW_EMPTY_SLOT;
   }
   GetKeyAfterApproveArgs_.Slot = slot;
   os_memcpy(GetKeyAfterApproveArgs_.caller_pub, data, X25519_PTSIZE);
@@ -121,6 +121,7 @@ static void handleGetKey(uint8_t slot, uint8_t p2, uint8_t const *data,
   ApproveLine2[6] = '0' + slot;
   ui_approval(handleGetKeyAfterApprove);
   *flags |= IO_ASYNCH_REPLY;
+  return KPL_SW_SUCCESS;
 }
 
 #define SLIP21_PATH_SYSCALL "\x00" SLIP21_PATH
@@ -134,7 +135,7 @@ static struct {
   uint8_t name_len;
 } GetKeyFromNameArgs_;
 
-static void handleGetKeyFromNameAfterApprove(uint8_t *tx) {
+static uint16_t handleGetKeyFromNameAfterApprove(uint8_t *tx) {
   uint8_t *kpkey = &G_io_apdu_buffer[X25519_PTSIZE];
   // Inspired by
   // https://github.com/LedgerHQ/app-passwords/blob/b64b12b32e4c6bca21c208b97a42e3bd025bc926/src/password_typing.c#L46
@@ -162,11 +163,11 @@ static void handleGetKeyFromNameAfterApprove(uint8_t *tx) {
   uint8_t *own_pubkey = &G_io_apdu_buffer[0];
   if (!X25519EncryptKPKey(kpkey, own_pubkey, GetKeyFromNameArgs_.caller_pub)) {
     ui_idle();
-    THROW(INVALID_PARAMETER);
+    return INVALID_PARAMETER;
   }
 
   *tx = X25519_PTSIZE + KPL_KEY_SIZE;
-  THROW(KPL_SW_SUCCESS);
+  return KPL_SW_SUCCESS;
 }
 
 // All characters must be printable ASCII
@@ -179,12 +180,13 @@ static bool is_name_valid(const uint8_t *buf, size_t len) {
   }
   return true;
 }
-static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const *data,
-                                 uint8_t data_len, volatile unsigned int *flags,
-                                 volatile unsigned int *tx) {
+static uint16_t handleGetKeyFromName(uint8_t p1, uint8_t p2,
+                                     uint8_t const *data, uint8_t data_len,
+                                     volatile unsigned int *flags,
+                                     volatile unsigned int *tx) {
   if (data_len <= X25519_PTSIZE ||
       (data_len > (X25519_PTSIZE + KPL_MAX_NAME_SIZE))) {
-    THROW(INVALID_PARAMETER);
+    return INVALID_PARAMETER;
   }
 
   os_memcpy(GetKeyFromNameArgs_.caller_pub, data, X25519_PTSIZE);
@@ -192,7 +194,7 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const *data,
   data_len -= X25519_PTSIZE;
 
   if (!is_name_valid(data, data_len)) {
-    THROW(KPL_SW_INVALID_NAME);
+    return KPL_SW_INVALID_NAME;
   }
 
   uint8_t *name = GetKeyFromNameArgs_.name;
@@ -209,19 +211,21 @@ static void handleGetKeyFromName(uint8_t p1, uint8_t p2, uint8_t const *data,
   ApproveLine2[data_len + 2] = 0;
   ui_approval(handleGetKeyFromNameAfterApprove);
   *flags |= IO_ASYNCH_REPLY;
+  return KPL_SW_SUCCESS;
 }
 
-static void handleGetValidSlots(uint8_t p1, uint8_t p2, uint8_t const *data,
-                                uint8_t data_len, volatile unsigned int *flags,
-                                volatile unsigned int *tx) {
+static uint16_t handleGetValidSlots(uint8_t p1, uint8_t p2, uint8_t const *data,
+                                    uint8_t data_len,
+                                    volatile unsigned int *flags,
+                                    volatile unsigned int *tx) {
   G_io_apdu_buffer[0] = N_storage.key_valids;
   *tx = 1;
-  THROW(KPL_SW_SUCCESS);
+  return KPL_SW_SUCCESS;
 }
 
-static handleInstrFunTy Funcs[] = {handleGetAppConfiguration, handleStoreKey,
-                                   handleGetKey, handleGetKeyFromName,
-                                   handleGetValidSlots};
+static const handleInstrFunTy Funcs[] = {
+    handleGetAppConfiguration, handleStoreKey, handleGetKey,
+    handleGetKeyFromName, handleGetValidSlots};
 
 handleInstrFunTy getHandleInstr(uint8_t Ins) {
   if (Ins >= INS_LAST) {
