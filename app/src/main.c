@@ -50,8 +50,10 @@ static void handleApdu(volatile unsigned int *flags,
       if (len > (IO_APDU_BUFFER_SIZE - OFFSET_CDATA)) {
         THROW(INVALID_PARAMETER);
       }
-      F(G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2],
-        &G_io_apdu_buffer[OFFSET_CDATA], len, flags, tx);
+      const uint16_t ret =
+          F(G_io_apdu_buffer[OFFSET_P1], G_io_apdu_buffer[OFFSET_P2],
+            &G_io_apdu_buffer[OFFSET_CDATA], len, flags, tx);
+      THROW(ret);
     }
     CATCH(EXCEPTION_IO_RESET) { THROW(EXCEPTION_IO_RESET); }
     CATCH_OTHER(e) {

@@ -56,7 +56,10 @@ static approve_callback_ty approve_cb_;
 static void touch_okay() {
   uint8_t tx = 0;
   BEGIN_TRY {
-    TRY { approve_cb_(&tx); }
+    TRY {
+      const uint16_t ret = approve_cb_(&tx);
+      THROW(ret);
+    }
     CATCH(EXCEPTION_IO_RESET) { THROW(EXCEPTION_IO_RESET); }
     CATCH_OTHER(e) {
       uint16_t sw;
