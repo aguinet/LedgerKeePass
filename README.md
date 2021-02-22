@@ -111,7 +111,7 @@ $ sudo port install cmake hidapi libsodium
 To build the library:
 
 ```
-cd libkpl && make build && cd build
+cd libkpl && mkdir build && cd build
 cmake -DCMAKE_BUILD_TYPE=Release ..
 make
 cmake -DCMAKE_INSTALL_PREFIX=/path/to/prefix -P cmake_install.cmake
