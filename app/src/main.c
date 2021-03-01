@@ -252,6 +252,8 @@ __attribute__((section(".boot"))) int main(void) {
   __asm volatile("cpsie i");
 
   CCASSERT(0, LEDGER_MAJOR_VERSION == KPL_VERSION_PROTOCOL);
+  CCASSERT(0, LEDGER_MINOR_VERSION == KPL_VERSION_MINOR);
+  CCASSERT(0, LEDGER_PATCH_VERSION == KPL_VERSION_PATCH);
 
   // ensure exception will work as planned
   os_boot();
