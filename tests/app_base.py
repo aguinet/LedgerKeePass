@@ -55,6 +55,10 @@ def automation_refuse_txt(txts):
 
 class BaseTestCase:
     def setup_speculos(self, automation=None):
+        if automation is not None and speculos_model == "nanox":
+            # Looks like the text checking automation isn't reproductible accross systems with the Nano X
+            self.skipTest("unsupported case for Speculos")
+            return
         return SetupSpeculos(self.API, automation)
 
     def erase_all_slots(self):
