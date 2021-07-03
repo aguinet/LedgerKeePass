@@ -10,6 +10,7 @@ STORE_KEY = 1
 GET_KEY = 2
 GET_KEY_FROM_NAME = 3
 GET_VALID_KEY_SLOTS = 4
+ERASE_ALL_SLOTS = 5
 
 class PyKPL:
     exception = CommException
@@ -43,6 +44,10 @@ class PyKPL:
             s += 1
         return ret
 
+    @classmethod
+    def erase_all_slots(cls, dongle):
+        dongle.apdu_exchange(ERASE_ALL_SLOTS, b"", 0, 0)
+
     # X25519 exchange helpers
     @staticmethod
     def gen_x25519_keypair():
@@ -66,9 +71,10 @@ class PyKPL:
         return bytes(a^b for a,b in zip(key,keystream))
 
     @staticmethod
-    def connect(port):
-        return LedgerClient(device=TcpDevice("127.0.0.1:%d" % port))
+    def connect(host,port):
+        return LedgerClient(device=TcpDevice("%s:%d" % (host,port)))
 
 if __name__ == "__main__":
-    clt = LedgerClient()
+    clt = LedgerClient(device=TcpDevice("127.0.0.1:1112"))
+    PyKPL.erase_all_slots(clt)
     print(PyKPL.get_key_from_name(clt, b"test").hex())

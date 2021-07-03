@@ -19,8 +19,10 @@ RUN pip3 install --user -r /tmp/requirements.txt
 # Clone the Nano S SDK
 RUN cd /opt && git clone https://github.com/LedgerHQ/nanos-secure-sdk --depth=1 --branch=nanos-1612 && rm -rf /opt/nanos-secure-sdk/.git
 
-# Clone the Nano X sdk
-RUN cd /opt && git clone https://github.com/LedgerHQ/nanox-secure-sdk --depth=1 && rm -rf /opt/nanox-secure-sdk/.git
+# Clone the Nano X sdk. Also patch it because the clang version verification check is broken because ¯\_(ツ)_/¯...
+COPY nanox_sdk.patch /tmp
+RUN cd /opt && git clone https://github.com/LedgerHQ/nanox-secure-sdk --depth=1 && rm -rf /opt/nanox-secure-sdk/.git && \
+    (cd nanox-secure-sdk && patch -p1 </tmp/nanox_sdk.patch) && rm /tmp/nanox_sdk.patch
 
 # Download GCC ARM toolchain
 RUN cd /opt && \
@@ -41,7 +43,7 @@ FROM ubuntu:20.04
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
   build-essential g++ cmake gcc-multilib \
   qemu-user-static \
-  python3-construct python3-jsonschema python3-mnemonic python3-pyelftools \
+  python3-construct python3-jsonschema python3-mnemonic python3-pyelftools python3-flask-restful \
   libsodium-dev libhidapi-dev && \
   rm -rf /var/cache/apt /var/lib/apt/lists/* /usr/share/doc
 

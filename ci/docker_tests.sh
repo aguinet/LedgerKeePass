@@ -17,6 +17,8 @@ cmake -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON ..
 make -j$(nproc)
 popd
 
+SPECULOS_BIN="/opt/speculos/speculos.py"
+
 # Build the app for Nano S
 pushd "$SRCDIR/app"
 export BOLOS_SDK=$NANOS_SDK
@@ -24,7 +26,7 @@ make clean && make -j$(nproc)
 popd
 
 # Run the tests
-"$SRCDIR/tests/run.sh" /opt/speculos/speculos.py "$KPL_BUILDDIR" nanos
+python3 "$SRCDIR/tests/run.py" --kpl-build-dir "$KPL_BUILDDIR" --model nanos --speculos-bin "$SPECULOS_BIN"
 
 # Build the app for Nano X
 pushd "$SRCDIR/app"
@@ -33,4 +35,4 @@ make clean && make -j$(nproc)
 popd
 
 # Run the tests
-"$SRCDIR/tests/run.sh" /opt/speculos/speculos.py "$KPL_BUILDDIR" nanox
+python3 "$SRCDIR/tests/run.py" --kpl-build-dir "$KPL_BUILDDIR" --model nanox --speculos-bin "$SPECULOS_BIN"
