@@ -9,6 +9,7 @@ enum AppInstrs {
   INS_GET_KEY = 2,
   INS_GET_KEY_FROM_NAME = 3,
   INS_GET_VALID_SLOTS = 4,
+  INS_ERASE_ALL_SLOTS = 5,
   INS_LAST
 };
 

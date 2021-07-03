@@ -17,6 +17,7 @@
 
 #include "instrs.h"
 #include "menu.h"
+#include "nv_state.h"
 
 #include <kpl/app_errors.h>
 #include <kpl/kpl_csts.h>
@@ -236,8 +237,8 @@ void app_exit(void) {
   END_TRY_L(exit);
 }
 
-void nv_app_state_init() {
-  if (N_storage.initialized != 0x01) {
+void nv_app_state_init(bool force) {
+  if (force || N_storage.initialized != 0x01) {
     internalStorage_t storage;
     storage.key_valids = 0;
     storage.initialized = 0x01;
@@ -270,7 +271,7 @@ __attribute__((section(".boot"))) int main(void) {
         G_io_app.plane_mode = os_setting_get(OS_SETTING_PLANEMODE, NULL, 0);
 #endif
 
-        nv_app_state_init();
+        nv_app_state_init(false /* force */);
 
         USB_power(0);
         USB_power(1);
