@@ -4,6 +4,7 @@
 #include "menu.h"
 #include "os.h"
 #include "x25519.h"
+#include "nv_state.h"
 #include <assert.h>
 #include <kpl/app_errors.h>
 #include <kpl/kpl_csts.h>
@@ -223,9 +224,26 @@ static uint16_t handleGetValidSlots(uint8_t p1, uint8_t p2, uint8_t const *data,
   return KPL_SW_SUCCESS;
 }
 
+static uint16_t handleEraseAllSlotsApprove(uint8_t *tx) {
+  *tx = 0;
+  nv_app_state_init(true /* force */);
+  return KPL_SW_SUCCESS;
+}
+
+static uint16_t handleEraseAllSlots(uint8_t p1, uint8_t p2, uint8_t const *data,
+                             uint8_t data_len, volatile unsigned int *flags,
+                             volatile unsigned int *tx) {
+  // Warning: if this string changes, the tests need to be adpated!
+  os_memcpy(ApproveLine1, "Erase all slots?", 17);
+  os_memcpy(ApproveLine2, "They will be erased forever!", 29);
+  ui_approval(handleEraseAllSlotsApprove);
+  *flags |= IO_ASYNCH_REPLY;
+  return KPL_SW_SUCCESS;
+}
+
 static const handleInstrFunTy Funcs[] = {
     handleGetAppConfiguration, handleStoreKey, handleGetKey,
-    handleGetKeyFromName, handleGetValidSlots};
+    handleGetKeyFromName, handleGetValidSlots, handleEraseAllSlots};
 
 handleInstrFunTy getHandleInstr(uint8_t Ins) {
   if (Ins >= INS_LAST) {
