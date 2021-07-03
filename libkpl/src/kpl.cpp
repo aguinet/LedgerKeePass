@@ -223,4 +223,14 @@ Result KPL::getValidKeySlots(std::vector<uint8_t> &Out, unsigned TimeoutMS) {
   return Result::SUCCESS;
 }
 
+Result KPL::eraseAllSlots(unsigned TimeoutMS) {
+  LedgerAnswer<1> Buf;
+  auto Res =
+      Client_.apduStream(Instrs::ERASE_ALL_SLOTS).exchange(Buf, TimeoutMS);
+  if (Res != Result::SUCCESS) {
+    return Res;
+  }
+  return parseAppSW(Buf.SW());
+}
+
 } // namespace kpl

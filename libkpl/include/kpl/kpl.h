@@ -38,6 +38,7 @@ public:
   Result getValidKeySlots(std::vector<uint8_t> &Out, unsigned TimeoutMS = 0);
   Result getKeyFromName(const char *Name, uint8_t *Out, const size_t OutLen,
                         unsigned TimeoutMS = 0);
+  Result eraseAllSlots(unsigned TimeoutMS = 0);
 
   Version const &appVer() const { return AppVer_; }
 
