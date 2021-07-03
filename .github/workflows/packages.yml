@@ -18,7 +18,7 @@ jobs:
         arch:
           - x64
         toolset:
-          - 14.22 # VS2019
+          - 14.29 # VS2019
     runs-on: windows-2019
 
     steps:
@@ -56,7 +56,7 @@ jobs:
           - debug
           - release
         toolset:
-          - 14.22 # VS2019
+          - 14.29 # VS2019
     runs-on: windows-2019
 
     steps:
@@ -176,7 +176,7 @@ jobs:
     strategy:
       matrix:
         include:
-        - kpl: kpl-x64-windows-static-release-msvc14.22
+        - kpl: kpl-x64-windows-static-release-msvc14.29
           libname: kpl_c.dll
           archname: x64-windows
         - kpl: kpl-x64-ubuntu16.04
@@ -228,7 +228,7 @@ jobs:
 
     - name: Zip artifacts
       run: |
-        for a in kpl-x64-windows-static-release-msvc14.22 kpl-x64-ubuntu16.04 kpl-x64-macos-10.15-static; do zip -r $a.zip $a; done
+        for a in kpl-x64-windows-static-release-msvc14.29 kpl-x64-ubuntu16.04 kpl-x64-macos-10.15-static; do zip -r $a.zip $a; done
         for a in KeePass${KP2_VER}-plugin-x64-windows KeePass${KP2_VER}-plugin-x64-ubuntu16.04; do pushd $a; zip -r ../$a.zip *; popd; done
 
     - name: Create Release
@@ -242,14 +242,14 @@ jobs:
         draft: true
         prerelease: false
 
-    - name: Upload kpl-x86-windows-static-release-msvc14.22
+    - name: Upload kpl-x86-windows-static-release-msvc14.29
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: kpl-x64-windows-static-release-msvc14.22.zip
-        asset_name: kpl-x64-windows-static-release-msvc14.22.zip
+        asset_path: kpl-x64-windows-static-release-msvc14.29.zip
+        asset_name: kpl-x64-windows-static-release-msvc14.29.zip
         asset_content_type: application/zip
 
     - name: Upload kpl-x64-ubuntu16.04
