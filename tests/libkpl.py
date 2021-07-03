@@ -26,14 +26,19 @@ class LibKPL:
         slots = cls.run(port, "kpl_get_slots").strip().decode("ascii")
         return [int(v.strip()) for v in slots.split(" ")]
 
+    @classmethod
+    def erase_all_slots(cls, port):
+        cls.run(port, "kpl_erase_all_slots")
+
     @staticmethod
-    def connect(port):
-        return port
+    def connect(host,port):
+        return (host,port)
 
     # Helpers
     @staticmethod
-    def run(port, tool, *args):
-        env = {'LEDGER_PROXY_ADDRESS': '127.0.0.1', 'LEDGER_PROXY_PORT': str(port)}
+    def run(host_port, tool, *args):
+        host,port = host_port
+        env = {'LEDGER_PROXY_ADDRESS': host, 'LEDGER_PROXY_PORT': str(port)}
         pargs = [os.path.join(KPL_BUILD_DIR, "tools", tool)] + list(args)
         p = subprocess.run(pargs, stdout=subprocess.PIPE, check=True, env=env)
         return p.stdout
