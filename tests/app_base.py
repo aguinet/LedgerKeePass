@@ -4,20 +4,10 @@ import itertools
 
 from setup_speculos import SetupSpeculos, speculos_model
 
-TXT_KEEPASS_OPEN_NAME = "Database open name" if speculos_model == "nanos" else "Database open name\n'perso'"
-def TXT_KEEPASS_OPEN_SLOT(slot):
-    s = "Database open slot"
-    if speculos_model == "nanox":
-        s += "\nSlot #%d" % slot
-    return s
-def TXT_ERASE(slot):
-    s = ""
-    if speculos_model == "nanox":
-        s = "Slot #%d already set.\n" % slot
-    s += "Erase?"
-    return s
-
-TXT_ERASE_ALL_SLOTS = "Erase all slots?" if speculos_model == "nanos" else "Erase all slots?\nThey will ...ed forever!"
+TXT_KEEPASS_OPEN_NAME = "Database open name"
+TXT_KEEPASS_OPEN_SLOT = "Database open slot"
+TXT_ERASE = "Erase?"
+TXT_ERASE_ALL_SLOTS = "Erase all slots?"
 SLOT_COUNT = 8
 
 class Btn:
@@ -81,7 +71,7 @@ class BaseTestCase:
 
     def test_store_key_erase_accepts(self):
         self.erase_all_slots()
-        automation_accept = automation_accept_txt([TXT_ERASE(1),TXT_KEEPASS_OPEN_SLOT(1)])
+        automation_accept = automation_accept_txt([TXT_ERASE,TXT_KEEPASS_OPEN_SLOT])
         key0 = bytes(random.getrandbits(8) for _ in range(32))
         key1 = bytes(random.getrandbits(8) for _ in range(32))
 
@@ -96,7 +86,7 @@ class BaseTestCase:
 
     def test_store_key_erase_refuses(self):
         self.erase_all_slots()
-        automation_refuse = automation_refuse_txt(TXT_ERASE(1))
+        automation_refuse = automation_refuse_txt(TXT_ERASE)
         key0 = bytes(random.getrandbits(8) for _ in range(32))
 
         with self.setup_speculos(automation_refuse) as dongle:
@@ -106,7 +96,7 @@ class BaseTestCase:
 
     def test_store_get_key_slot(self):
         self.erase_all_slots()
-        automation_accept = automation_accept_txt(list(set(TXT_KEEPASS_OPEN_SLOT(s) for s in range(SLOT_COUNT))))
+        automation_accept = automation_accept_txt(TXT_KEEPASS_OPEN_SLOT)
         with self.setup_speculos(automation_accept) as dongle:
             for s in range(SLOT_COUNT):
                 keyref = bytes(random.getrandbits(8) for _ in range(32))
