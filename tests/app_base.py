@@ -45,6 +45,8 @@ def automation_refuse_txt(txts):
 
 class BaseTestCase:
     def setup_speculos(self, automation=None):
+        if speculos_model == "nanox":
+            self.skipTest("non-reproducible issue of automation with Nano X")
         return SetupSpeculos(self.API, automation)
 
     def erase_all_slots(self):
