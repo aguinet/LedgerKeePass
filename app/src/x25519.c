@@ -1,5 +1,12 @@
 #include "x25519.h"
 #include "os.h"
+
+#ifdef TARGET_NANOS
+#include "lcx_sha256.h"
+#include "lcx_blake2.h"
+#include "lcx_rng.h"
+#endif
+
 #include <kpl/kpl_csts.h>
 #include <string.h>
 
