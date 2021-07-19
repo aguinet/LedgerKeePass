@@ -17,7 +17,7 @@ COPY tests/requirements.txt /tmp
 RUN pip3 install --user -r /tmp/requirements.txt
 
 # Clone the Nano S SDK
-RUN cd /opt && git clone https://github.com/LedgerHQ/nanos-secure-sdk --depth=1 --branch=nanos-1612 && rm -rf /opt/nanos-secure-sdk/.git
+RUN cd /opt && git clone https://github.com/LedgerHQ/nanos-secure-sdk --depth=1 --branch=2.0.0-1 && rm -rf /opt/nanos-secure-sdk/.git
 
 # Clone the Nano X sdk. Also patch it because the clang version verification check is broken because ¯\_(ツ)_/¯...
 COPY nanox_sdk.patch /tmp

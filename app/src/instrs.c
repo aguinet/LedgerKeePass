@@ -5,6 +5,11 @@
 #include "os.h"
 #include "x25519.h"
 #include "nv_state.h"
+
+#ifdef TARGET_NANOS
+#include "lcx_sha256.h"
+#endif
+
 #include <assert.h>
 #include <kpl/app_errors.h>
 #include <kpl/kpl_csts.h>

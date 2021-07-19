@@ -15,7 +15,7 @@ def run_speculos(path, app_bin, model):
     automation_port = 32002
     args = [sys.executable, path, app_bin, "--apdu-port", str(apdu_port), "--api-port", str(automation_port), "--display","headless", "--model", model]
     if model == "nanos":
-        args += ["-k", "1.6"]
+        args += ["-k", "2.0"]
     process = subprocess.Popen(args)
     atexit.register(kill_speculos, process)
     # Wait for at least two listening ports for this process
