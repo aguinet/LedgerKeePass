@@ -5,7 +5,7 @@
     <Product>KeePass Plugin</Product>
     <KP2Path>/usr/lib/keepass2/KeePass.exe</KP2Path>
     <Authors>Adrien Guinet</Authors>
-    <Version>0.2.0</Version>
+    <Version>0.3.0</Version>
     <Company />
     <PackageProjectUrl>https://github.com/aguinet/LedgerKeePass</PackageProjectUrl>
   </PropertyGroup>
