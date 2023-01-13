@@ -76,7 +76,7 @@ sudo apt install libhidapi-libusb0
 ### Ledger application
 
 You first need to install the [BOLOS
-SDK](https://ledger.readthedocs.io/en/latest/userspace/getting_started.html).
+SDK](https://developers.ledger.com/docs/embedded-app/bolos-features/).
 You especially need to setup the ``BOLOS_SDK`` environment variable to the
 directory where you extracted the SDK, and get a working Clang cross compiler.
 
