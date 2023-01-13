@@ -24,7 +24,7 @@ This application supports Ledger Nano S and X devices. Blue isn't supported.
 or corrupted, and/or secrets leaked. You have been warned.** This section explains why.
 
 The 0.2.0 version of the Ledger application has been submitted to Ledger for
-[approval](https://ledger.readthedocs.io/en/latest/additional/publishing_an_app.html).
+[approval](https://developers.ledger.com/docs/embedded-app/bolos-features/).
 This review might involve some changes that could modify the way keys are
 derived from database names. If such changes need to occur, that would mean
 that databases previously encrypted could be lost.
